@@ -91,3 +91,8 @@ venv.bak/
 
 # mkdocs documentation
 /site
+
+### Terraform ###
+.terraform/
+*.tfstate*
+*secret.tfvars
