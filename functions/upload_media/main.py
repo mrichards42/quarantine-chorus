@@ -10,6 +10,7 @@ storage_client = storage.Client()
 db = firestore.Client()
 
 UPLOAD_BUCKET = os.environ['UPLOAD_BUCKET']
+SUBMISSIONS_COLLECTION = os.environ['SUBMISSIONS_COLLECTION']
 
 logging.basicConfig(level=logging.INFO)
 
@@ -33,8 +34,7 @@ def add_firestore_document(data, object_name):
         'object_url': f'gs://{UPLOAD_BUCKET}/{object_name}',
         'created': datetime.now(),
     })
-    # TODO: maybe subcollection per song?
-    ref = db.collection('uploads').document(object_name)
+    ref = db.collection(SUBMISSIONS_COLLECTION).document(object_name)
     ref.set(doc)
 
 def upload_media(request):
