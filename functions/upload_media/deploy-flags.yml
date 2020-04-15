@@ -1,0 +1,5 @@
+--memory: 128MB
+--runtime: python37
+--trigger-http:
+--allow-unauthenticated:
+--env-vars-file: env.yml
