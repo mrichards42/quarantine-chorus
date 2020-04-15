@@ -3,21 +3,39 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 
+from google.cloud import firestore
 from google.cloud import storage
 
 storage_client = storage.Client()
+db = firestore.Client()
+
 UPLOAD_BUCKET = os.environ['UPLOAD_BUCKET']
 
 logging.basicConfig(level=logging.INFO)
+
+def _select_keys(d, ks):
+    return {k: d[k] for k in ks if k in d}
 
 def object_name(data, timestamp, extension):
     meta = data['metadata']
     parts = (
         [meta.get(x) for x in ('song', 'part')] +
         meta['names'] +
-        [meta.get('location').get(x) for x in ('city', 'state', 'county')]
+        [meta.get('location').get(x) for x in ('city', 'state', 'country')]
     )
     return '_'.join(filter(None, parts)) + '.' + timestamp + extension
+
+def add_firestore_document(data, object_name):
+    meta = data['metadata']
+    doc = _select_keys(meta, ['song', 'part', 'names'])
+    doc.update({
+        'location': _select_keys(meta['location'], ['city', 'state', 'country']),
+        'object_url': f'gs://{UPLOAD_BUCKET}/{object_name}',
+        'created': datetime.now(),
+    })
+    # TODO: maybe subcollection per song?
+    ref = db.collection('uploads').document(object_name)
+    ref.set(doc)
 
 def upload_media(request):
     """Initiates a media upload.
@@ -48,8 +66,11 @@ def upload_media(request):
     timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')
     extension = Path(data['filename']).suffix
     name = object_name(data, timestamp, extension)
-    logging.info('Creating upload request for object %s', name)
 
+    logging.info('Creating firestore document')
+    add_firestore_document(data, name)
+
+    logging.info('Creating upload request for object %s', name)
     bucket = storage_client.bucket(UPLOAD_BUCKET)
     blob = bucket.blob(name)
 
