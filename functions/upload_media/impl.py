@@ -1,4 +1,5 @@
 import funcy as F
+import re
 from datetime import datetime
 
 import flask
@@ -8,6 +9,9 @@ import schema
 
 def all_parts(submission):
     return sorted(set(s.get('part') for s in submission['singers']))
+
+def sanitize(filename):
+    return re.sub(r'[^a-zA-Z0-9_.]', '', filename)
 
 def object_name(submission, extension):
     singers = submission['singers']
@@ -22,7 +26,7 @@ def object_name(submission, extension):
         # Location
         F.keep(submission.get('location', {}).get, ('city', 'state', 'country'))
     ))
-    return '_'.join(filter(None, name_parts)) + extension
+    return sanitize('_'.join(filter(None, name_parts)) + extension)
 
 DOC_KEYS = ('singing', 'song', 'singers', 'location', 'master')
 
