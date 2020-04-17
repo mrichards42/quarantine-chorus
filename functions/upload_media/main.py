@@ -43,11 +43,12 @@ def upload_media(request):
     extension = Path(data['filename']).suffix
     object_name = impl.object_name(submission, extension)
     object_url = f'gs://{UPLOAD_BUCKET}/{object_name}'
-    logging.info('Creating firestore document')
 
     # Create the firestore document
+    logging.info('Creating firestore document')
+    doc = impl.firestore_document(submission, object_url)
     ref = db.collection(SUBMISSIONS_COLLECTION).document(object_name)
-    ref.set(impl.firestore_document(submission, object_url))
+    ref.set(doc)
 
     # Create and return a resumable upload URL for the bucket
     logging.info('Creating upload request for %s', object_url)
