@@ -6,6 +6,8 @@ from pathlib import Path
 from google.cloud import firestore
 from google.cloud import storage
 
+import impl
+
 storage_client = storage.Client()
 db = firestore.Client()
 
@@ -13,29 +15,6 @@ UPLOAD_BUCKET = os.environ['UPLOAD_BUCKET']
 SUBMISSIONS_COLLECTION = os.environ['SUBMISSIONS_COLLECTION']
 
 logging.basicConfig(level=logging.INFO)
-
-def _select_keys(d, ks):
-    return {k: d[k] for k in ks if k in d}
-
-def object_name(data, timestamp, extension):
-    meta = data['metadata']
-    parts = (
-        [meta.get(x) for x in ('song', 'part')] +
-        meta['names'] +
-        [meta.get('location').get(x) for x in ('city', 'state', 'country')]
-    )
-    return '_'.join(filter(None, parts)) + '.' + timestamp + extension
-
-def add_firestore_document(data, object_name):
-    meta = data['metadata']
-    doc = _select_keys(meta, ['song', 'part', 'names'])
-    doc.update({
-        'location': _select_keys(meta['location'], ['city', 'state', 'country']),
-        'object_url': f'gs://{UPLOAD_BUCKET}/{object_name}',
-        'created': datetime.now(),
-    })
-    ref = db.collection(SUBMISSIONS_COLLECTION).document(object_name)
-    ref.set(doc)
 
 def upload_media(request):
     """Initiates a media upload.
@@ -45,34 +24,35 @@ def upload_media(request):
     * content-type
     * content-length
     * filename
-    * metadata
+    * submission
+        * singing
         * song
-        * names (list of people involved)
-        * part (bass, alto, tenor, treble)
-        * location
-            * city
-            * state
-            * country
-        * additional metadata is allowed
+        * participants (list of names and parts)
+        * location (city, state, country)
+        * master (true for the master recording for a given part)
 
-    Metadata will be stored in a firebase database.
+    Submission data will be stored in a firebase database.
 
     Returns a url that can be used to start a resumable cloud storage upload.
     """
-    # TODO: swagger spec? for now, just assume the data is good
-    data = request.get_json(silent=True) or request.args
-    logging.info('Received request with data: %s', data)
+    # Parse the request
+    data = impl.parse_upload_request(request)
+    submission = data['submission']
 
-    timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')
+    # Build the storage object url
     extension = Path(data['filename']).suffix
-    name = object_name(data, timestamp, extension)
-
+    object_name = impl.object_name(submission, extension)
+    object_url = f'gs://{UPLOAD_BUCKET}/{object_name}'
     logging.info('Creating firestore document')
-    add_firestore_document(data, name)
 
-    logging.info('Creating upload request for object %s', name)
+    # Create the firestore document
+    ref = db.collection(SUBMISSIONS_COLLECTION).document(object_name)
+    ref.set(impl.firestore_document(submission, object_url))
+
+    # Create and return a resumable upload URL for the bucket
+    logging.info('Creating upload request for %s', object_url)
     bucket = storage_client.bucket(UPLOAD_BUCKET)
-    blob = bucket.blob(name)
+    blob = bucket.blob(object_name)
 
     return blob.create_resumable_upload_session(
         content_type=data['content-type'],
