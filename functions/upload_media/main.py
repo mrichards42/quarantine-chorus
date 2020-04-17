@@ -1,7 +1,7 @@
 import logging
 import os
-from datetime import datetime, timezone
 from pathlib import Path
+import flask
 
 from google.cloud import firestore
 from google.cloud import storage
@@ -59,3 +59,5 @@ def upload_media(request):
         size=data['content_length'],
         origin=request.headers.get('origin')
     )
+
+    return flask.json.jsonify({"upload_url": url})

@@ -36,10 +36,19 @@ def firestore_document(submission, object_url):
     # validate before we send this to firestore, just in case
     return schema.SubmissionSchema().load(doc)
 
+def _error(data, code):
+    flask.abort(flask.Response(
+        response=flask.json.dumps(data),
+        status=code,
+        mimetype='application/json'
+    ))
+
 def parse_upload_request(request):
     if request.method != 'POST':
-        flask.abort(405)
+        _error({"error": f"{request.method} not allowed"}, 405)
     try:
         return schema.UploadRequest().load(request.get_json(silent=True) or request.args)
     except marshmallow.exceptions.ValidationError as e:
-        flask.abort(400, str(e))
+        _error({"error": "Bad request",
+                "messages": e.messages},
+               400)
