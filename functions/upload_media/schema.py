@@ -45,6 +45,11 @@ class ParticipantSchema(Schema):
     last_name = fields.Str()
     part = fields.Str(required=True, validate=validate.OneOf(PARTS))
 
+    @pre_load
+    def normalize_part(self, in_data, **kwargs):
+        in_data['part'] = in_data.get('part', '').lower()
+        return in_data
+
 class LocationSchema(Schema):
     city = fields.Str()
     state = fields.Str()
