@@ -21,8 +21,8 @@ def upload_media(request):
 
     Request should include:
 
-    * content-type
-    * content-length
+    * content_type
+    * content_length
     * filename
     * submission
         * singing
@@ -54,8 +54,8 @@ def upload_media(request):
     bucket = storage_client.bucket(UPLOAD_BUCKET)
     blob = bucket.blob(object_name)
 
-    return blob.create_resumable_upload_session(
-        content_type=data['content-type'],
-        size=data['content-length'],
+    url = blob.create_resumable_upload_session(
+        content_type=data['content_type'],
+        size=data['content_length'],
         origin=request.headers.get('origin')
     )
