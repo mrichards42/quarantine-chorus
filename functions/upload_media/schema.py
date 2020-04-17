@@ -40,9 +40,9 @@ class RealDateTime(fields.DateTime):
             return value
         return super()._deserialize(value, attr, data, **kwargs)
 
-class ParticipantSchema(Schema):
-    first_name = fields.Str()
-    last_name = fields.Str()
+class SingerSchema(Schema):
+    name = fields.Str()
+    email = fields.Str()
     part = fields.Str(required=True, validate=validate.OneOf(PARTS))
 
     @pre_load
@@ -59,8 +59,8 @@ class SubmissionSchema(Schema):
     # required fields
     singing = fields.Str(required=True)
     song = fields.Str(required=True)
-    participants = fields.List(fields.Nested(ParticipantSchema), required=True,
-                               validate=validate.Length(min=1))
+    singers = fields.List(fields.Nested(SingerSchema), required=True,
+                          validate=validate.Length(min=1))
     # optional fields
     location = fields.Nested(LocationSchema)
     master = fields.Bool()

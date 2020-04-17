@@ -6,30 +6,30 @@ import marshmallow
 
 import schema
 
-def participant_parts(submission):
-    return sorted(set(p.get('part') for p in submission['participants']))
+def all_parts(submission):
+    return sorted(set(s.get('part') for s in submission['singers']))
 
 def object_name(submission, extension):
-    participants = submission['participants']
+    singers = submission['singers']
     name_parts = F.flatten((
         # Song
         submission['singing'],
         submission['song'],
         # Parts
-        participant_parts(submission),
+        all_parts(submission),
         # Names
-        ['.'.join(F.keep(p.get, ('first_name', 'last_Name'))) for p in participants],
+        ['.'.join(s.get('name', '').split()) for s in singers],
         # Location
         F.keep(submission.get('location', {}).get, ('city', 'state', 'country'))
     ))
     return '_'.join(filter(None, name_parts)) + extension
 
-DOC_KEYS = ('singing', 'song', 'participants', 'location', 'master')
+DOC_KEYS = ('singing', 'song', 'singers', 'location', 'master')
 
 def firestore_document(submission, object_url):
     doc = F.project(submission, DOC_KEYS)
     doc.update({
-        'parts': participant_parts(submission),
+        'parts': all_parts(submission),
         'object_url': object_url,
         'created': datetime.now(),
     })
