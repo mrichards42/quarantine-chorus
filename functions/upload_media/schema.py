@@ -1,4 +1,5 @@
-from marshmallow import Schema, fields, pprint, validate
+import datetime
+from marshmallow import Schema, fields, pprint, validate, pre_load
 
 CONTENT_TYPE_RE = "video/.*|audio/.*"
 
@@ -32,6 +33,13 @@ MB = 1024 * 1024
 MAX_FILE_SIZE = 500 * MB
 PARTS = ('bass', 'alto', 'tenor', 'treble')
 
+class RealDateTime(fields.DateTime):
+    """Like fields.DateTime, but also accepts datetime.datetime objects"""
+    def _deserialize(self, value, attr, data, **kwargs):
+        if isinstance(value, datetime.datetime):
+            return value
+        return super()._deserialize(value, attr, data, **kwargs)
+
 class ParticipantSchema(Schema):
     first_name = fields.Str()
     last_name = fields.Str()
@@ -54,6 +62,7 @@ class SubmissionSchema(Schema):
     # fields required in firestore but not in upload
     object_url = fields.Str(validate=validate.Regexp("gs://.+/.+"))
     parts = fields.List(fields.Str(validate=validate.OneOf(PARTS)))
+    created = RealDateTime()
 
 class UploadRequest(Schema):
     submission = fields.Nested(SubmissionSchema, required=True)
