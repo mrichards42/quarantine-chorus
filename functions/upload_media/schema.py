@@ -1,5 +1,5 @@
 import datetime
-from marshmallow import Schema, fields, pprint, validate, pre_load
+from marshmallow import Schema, fields, pprint, validate, pre_load, post_load
 
 CONTENT_TYPE_RE = "video/.*|audio/.*"
 
@@ -47,7 +47,8 @@ class SingerSchema(Schema):
 
     @pre_load
     def normalize_part(self, in_data, **kwargs):
-        in_data['part'] = in_data.get('part', '').lower()
+        if 'part' in in_data:
+            in_data['part'] = in_data['part'].lower()
         return in_data
 
 class LocationSchema(Schema):
