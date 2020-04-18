@@ -14,19 +14,19 @@ def sanitize(filename):
     return re.sub(r'[^a-zA-Z0-9_.]', '', filename)
 
 def object_name(submission, extension):
-    singers = submission['singers']
     name_parts = F.flatten((
-        # Song
-        submission['singing'],
-        submission['song'],
         # Parts
         all_parts(submission),
         # Names
-        ['.'.join(s.get('name', '').split()) for s in singers],
+        ['.'.join(s.get('name', '').split()) for s in submission['singers']],
         # Location
         F.keep(submission.get('location', {}).get, ('city', 'state', 'country'))
     ))
-    return sanitize('_'.join(filter(None, name_parts)) + extension)
+    return '/'.join(F.map(sanitize, (
+        submission['singing'],
+        submission['song'],
+        '_'.join(filter(None, name_parts)) + extension
+    )))
 
 DOC_KEYS = ('singing', 'song', 'singers', 'location', 'master')
 
