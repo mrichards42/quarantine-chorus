@@ -1,5 +1,6 @@
 import funcy as F
 import re
+import uuid
 from datetime import datetime
 
 import flask
@@ -25,7 +26,8 @@ def object_name(submission, extension):
     return '/'.join(F.map(sanitize, (
         submission['singing'],
         submission['song'],
-        '_'.join(filter(None, name_parts)) + extension
+        # attach a uuid to the file name so that we never clobber uploads
+        '_'.join(filter(None, name_parts)) + '.' + str(uuid.uuid4()) + extension
     )))
 
 DOC_KEYS = ('singing', 'song', 'singers', 'location', 'master')
