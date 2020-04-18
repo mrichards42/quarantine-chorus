@@ -1,0 +1,9 @@
+# Global
+/submission/new  https://us-central1-mimetic-oxide-273915.cloudfunctions.net/upload_media  200
+
+# Specific songs
+
+# 37b
+/providence/37b/submit  /submission.html  200
+/providence/37b/master  https://storage.cloud.google.com/quarantine-chorus-upload/providence/37b/master.mp4 200
+

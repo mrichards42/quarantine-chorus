@@ -1,0 +1,89 @@
+/* snagged from the milligram docs */
+.wrapper {
+  display:block;
+  overflow:hidden;
+  position:relative;
+  width:100%
+}
+.wrapper .container {
+  max-width: 80rem
+}
+.wrapper>.container {
+  padding-bottom: 7.5rem;
+  padding-top: 7.5rem
+}
+.container .container {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Hide upload input (use upload label/button instead) */
+#uploadInput {
+  opacity: 0;
+  width: 0;
+}
+
+/* responsive video size */
+#uploadPreview video, #uploadPreview audio {
+  width: 100%    !important;
+  height: auto   !important;
+}
+
+.required-star {
+  color: red;
+}
+
+/* For a small group, don't bother with location */
+#location {
+  display: none;
+}
+
+/* Modal */
+/* Styles borrowed from https://github.com/gdkraus/accessible-modal-dialog */
+#modalOverlay {
+  width: 100%;
+  height: 100%;
+  z-index: 2; /* above the page */
+  background-color: #000;
+  opacity: 0.5;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: none;
+  margin: 0;
+  padding: 0;
+}
+
+.modal {
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 5px;
+  border: thin #000 solid;
+  background-color: #fff;
+  z-index: 3; /* above the overlay */
+  position: fixed;
+  top: 25%;
+  left: 25%;
+  display: none;
+}
+
+.modal > .container {
+  padding-bottom: 3rem;
+  padding-top: 3rem;
+}
+
+#progressBar {
+  height: 3rem;
+  border: 0.1rem solid #9b4dca;
+  border-radius: .4rem
+}
+
+#progress {
+  height: 100%;
+  background: #9b4dca;
+}
+
+#progressText {
+  text-align: right;
+}
