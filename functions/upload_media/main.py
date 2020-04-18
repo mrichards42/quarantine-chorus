@@ -40,7 +40,7 @@ def upload_media(request):
     submission = data['submission']
 
     # Build the storage object url
-    extension = Path(data['filename']).suffix
+    extension = Path(data['filename']).suffix # TODO: allow selection by mimetype?
     object_name = impl.object_name(submission, extension)
     object_url = f'gs://{UPLOAD_BUCKET}/{object_name}'
 

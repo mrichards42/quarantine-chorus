@@ -78,6 +78,6 @@ class SubmissionSchema(Schema):
 
 class UploadRequest(Schema):
     submission = fields.Nested(SubmissionSchema, required=True)
-    filename = fields.Str(required=True, validate=validate.Regexp(FILENAME_RE))
+    filename = fields.Str(required=True)
     content_type = fields.Str(required=True, validate=validate.Regexp(CONTENT_TYPE_RE))
     content_length = fields.Int(required=True, validate=validate.Range(0, MAX_FILE_SIZE))
