@@ -70,6 +70,12 @@ class SubmissionSchema(Schema):
     parts = fields.List(fields.Str(validate=validate.OneOf(PARTS)))
     created = RealDateTime()
 
+    @post_load
+    def normalize_data(self, in_data, **kwargs):
+        in_data['singing'] = in_data['singing'].lower()
+        in_data['song'] = in_data['song'].lower()
+        return in_data
+
 class UploadRequest(Schema):
     submission = fields.Nested(SubmissionSchema, required=True)
     filename = fields.Str(required=True, validate=validate.Regexp(FILENAME_RE))
