@@ -24,7 +24,7 @@
 }
 
 /* responsive video size */
-#uploadPreview video, #uploadPreview audio {
+video, audio {
   width: 100%    !important;
   height: auto   !important;
 }
