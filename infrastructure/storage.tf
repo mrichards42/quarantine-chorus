@@ -11,3 +11,9 @@ resource "google_storage_bucket" "aligned" {
   name     = "${var.bucket_prefix}-aligned"
   location = "US"
 }
+
+resource "google_storage_bucket" "audio" {
+  project  = google_project_service.storage.project
+  name     = "${var.bucket_prefix}-audio"
+  location = "US"
+}
