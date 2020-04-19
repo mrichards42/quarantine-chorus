@@ -5,5 +5,5 @@
 
 # 37b
 /providence/37b/submit  /submission.html  200
-/providence/37b/master  https://storage.cloud.google.com/quarantine-chorus-upload/providence/37b/master.mp4 200
+/providence/37b/reference  https://storage.cloud.google.com/quarantine-chorus-upload/providence/37b/reference.mp4 200
 

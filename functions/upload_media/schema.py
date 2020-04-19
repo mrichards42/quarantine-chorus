@@ -64,7 +64,7 @@ class SubmissionSchema(Schema):
                           validate=validate.Length(min=1))
     # optional fields
     location = fields.Nested(LocationSchema)
-    master = fields.Bool()
+    reference = fields.Bool()
     # fields required in firestore but not in upload
     object_url = fields.Str(validate=validate.Regexp("gs://.+/.+"))
     parts = fields.List(fields.Str(validate=validate.OneOf(PARTS)))

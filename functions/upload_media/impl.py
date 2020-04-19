@@ -30,7 +30,7 @@ def object_name(submission, extension):
         '_'.join(filter(None, name_parts)) + '.' + str(uuid.uuid4()) + extension
     )))
 
-DOC_KEYS = ('singing', 'song', 'singers', 'location', 'master')
+DOC_KEYS = ('singing', 'song', 'singers', 'location', 'reference')
 
 def firestore_document(submission, object_url):
     doc = F.project(submission, DOC_KEYS)
