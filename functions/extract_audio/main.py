@@ -25,7 +25,9 @@ def extract_audio(data, context):
     _, temp2 = tempfile.mkstemp('.m4a')
     try:
         logging.info('Downloading %s', url)
-        # TODO: streaming download piped to ffmpeg?
+        # A lot of video formats don't support piping (e.g. mp4), so while
+        # downloading the whole file is inefficient, it's pretty much the only
+        # way to do it.
         blob.download_to_filename(temp1)
         # encode to aac
         logging.info('Extracting audio to %s', temp2)
