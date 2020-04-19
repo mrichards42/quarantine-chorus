@@ -12,8 +12,8 @@ resource "google_storage_bucket" "aligned" {
   location = "US"
 }
 
-resource "google_storage_bucket" "audio" {
+resource "google_storage_bucket" "audio_extracted" {
   project  = google_project_service.storage.project
-  name     = "${var.bucket_prefix}-audio"
+  name     = "${var.bucket_prefix}-audio-extracted"
   location = "US"
 }
