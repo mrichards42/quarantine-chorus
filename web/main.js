@@ -416,6 +416,10 @@
 
   function submit(formData, file) {
 
+    Sentry.configureScope(function(scope) {
+      scope.setExtra("form_data", JSON.stringify(formData));
+    });
+
     // setup the ui
     var progressPanel = document.getElementById('uploadProgress');
     var progressTitle = document.getElementById('progressTitle');
@@ -446,6 +450,7 @@
         progressTitle.textContent = 'Upload complete!';
         progressSubtitle.textContent = 'Thank you for your submission.';
       }).catch(function (e) {
+        Sentry.captureException(e);
         progressTitle.textContent = 'Something went wrong!';
         if (e.message === 'bad response') {
           console.error('SUBMIT ERROR', e);
