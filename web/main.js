@@ -298,6 +298,7 @@
   var submissionForm = document.getElementById('submissionForm');
   submissionForm.reset();
   var submitBtn = document.getElementById('submit');
+  var tryAgainBtn = document.getElementById('uploadTryAgain');
 
   function form2json() {
     function vals(name) {
@@ -351,14 +352,13 @@
     });
   }
 
+  var originalTitle = document.title;
+
   function performUpload(url, file) {
-    var progressTitle = document.getElementById('progressTitle');
-    var progressSubtitle = document.getElementById('progressSubtitle');
     var progress = document.getElementById('progress');
-    var progressText = document.getElementById('progressText');
     var progressLog = document.getElementById('progressLog');
-    var originalTitle = document.title;
-    var uploadComplete = document.getElementById('uploadComplete');
+
+    progressLog.textContent = 'Starting upload...';
 
     // moving average estimate
     // var est = estimator().start();
@@ -367,8 +367,6 @@
     function updateProgress(res) {
       // clearTimeout(timeout);
       if (res.done) {
-        progressTitle.textContent = 'Upload complete!';
-        progressSubtitle.textContent = 'Thank you for your submission.';
         progressLog.textContent = 'Done ' + humanFileSize(file.size);
         progress.style.width = '100%';
         document.title = '[100%] ' + originalTitle;
@@ -420,27 +418,43 @@
 
     // setup the ui
     var progressPanel = document.getElementById('uploadProgress');
+    var progressTitle = document.getElementById('progressTitle');
+    var progressSubtitle = document.getElementById('progressSubtitle');
     submissionWrapper.setAttribute('aria-hidden', true);
     submissionWrapper.style.display = 'none';
+    tryAgainBtn.style.display = 'none';
     progressPanel.setAttribute('aria-hidden', false);
     progressPanel.style.display = 'block';
     var start = new Date();
     console.log('start', start);
+
+    progressTitle.textContent = 'Uploading your submission';
+    progressSubtitle.textContent = 'Please leave this window open until your upload is complete';
 
     return submissionRequest(formData)
       .then(function (response) {
         if (response.upload_url) {
           return performUpload(response.upload_url, file);
         } else {
-          console.log('SUBMIT ERROR', response);
+          throw new Error('bad response', response);
         }
       }).then(function (response) {
         console.log('UPLOAD COMPLETE', response);
         var end = new Date();
         console.log('end', end);
         console.log('elapsed', end - start);
+        progressTitle.textContent = 'Upload complete!';
+        progressSubtitle.textContent = 'Thank you for your submission.';
       }).catch(function (e) {
-        console.error('UPLOAD EXCEPTION', e);
+        progressTitle.textContent = 'Something went wrong!';
+        if (e.message === 'bad response') {
+          console.error('SUBMIT ERROR', e);
+          progressSubtitle.textContent = 'Sorry, an error occurred while processing your submission. Please try again.'
+        } else {
+          console.error('UPLOAD EXCEPTION', e);
+          progressSubtitle.textContent = 'Sorry, an error occurred while uploading your file. Please try again.'
+        }
+        tryAgainBtn.style.display = 'block';
       });
   }
 
@@ -453,5 +467,13 @@
       var file = uploadInput.files[0];
       submit(data, file);
     }
+  })
+
+  tryAgainBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    // assume the form is correct
+    var data = form2json();
+    var file = uploadInput.files[0];
+    submit(data, file);
   })
 })()
