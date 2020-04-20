@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@0.1.2
         with:
-          version: '286.0.0'
+          version: '289.0.0'
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_email: ${{ secrets.GCP_SA_EMAIL }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
