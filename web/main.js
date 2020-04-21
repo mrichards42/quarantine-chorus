@@ -293,6 +293,15 @@
     return uploadChunkRequest(url, file, 0).then(handleResponse);
   }
 
+  // == Beforeunload Listener =================================================
+  function promptBeforeUnload(e) {
+    // https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event#Examples
+    msg = 'Your upload is still running. Do you want to leave?'
+    e.preventDefault()
+    e.returnValue = msg;
+    return msg;
+  }
+
   // == Submit Form ===========================================================
   var submissionWrapper = document.getElementById('submissionWrapper');
   var submissionForm = document.getElementById('submissionForm');
@@ -435,6 +444,7 @@
     progressTitle.textContent = 'Uploading your submission';
     progressSubtitle.textContent = 'Please leave this window open until your upload is complete';
 
+    window.addEventListener('beforeunload', promptBeforeUnload);
     return submissionRequest(formData)
       .then(function (response) {
         if (response.upload_url) {
@@ -460,6 +470,8 @@
           progressSubtitle.textContent = 'Sorry, an error occurred while uploading your file. Please try again.'
         }
         tryAgainBtn.style.display = 'block';
+      }).finally(function () {
+        window.removeEventListener('beforeunload', promptBeforeUnload);
       });
   }
 
