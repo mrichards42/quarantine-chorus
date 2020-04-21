@@ -56,19 +56,6 @@ def run_alignment(ref_segment, subj_segment):
     analysis, corr = align.cross_correlate(samplerate, ref_processed, subj_processed)
     return analysis
 
-"""
-samplerate = ref.frame_rate
-ref_wav = np.array(ref.get_array_of_samples())
-subj_wav = np.array(subj.get_array_of_samples())
-ref_processed = align.Preprocessor(ref_wav).loudness_75()
-subj_processed = align.Preprocessor(subj_wav).loudness_75()
-analysis, corr = align.cross_correlate(samplerate, ref_processed, subj_processed)
-
-import align.plot
-p = align.plot.Plotter(samplerate, ref_processed, subj_processed, corr, analysis)
-fig = p.make_plot()
-"""
-
 def get_aligned_segment(subj, analysis):
     if analysis['pad'] > 0:
         # Get silent samples
