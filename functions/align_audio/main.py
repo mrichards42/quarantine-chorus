@@ -100,6 +100,7 @@ def align_audio(data, context):
                      gcs_url(ref_blob.bucket.name, ref_blob.name))
     if not ref_blob:
         logging.warning('Unable to find appropriate reference audio! Aborting.')
+        return
 
     _, temp_subj = tempfile.mkstemp(Path(data['name']).suffix)
     _, temp_ref = tempfile.mkstemp('.m4a')
