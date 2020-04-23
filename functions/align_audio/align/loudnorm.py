@@ -27,7 +27,24 @@ def loudnorm_analysis(filename, trim_seconds=0):
     # lines of output.
     # https://gist.github.com/kylophone/84ba07f6205895e65c9634a956bf6d54#file-loudness-rb-L29
     json_str = '\n'.join(proc.stderr.decode('utf-8').splitlines()[-12:])
-    return json.loads(json_str)
+    d = json.loads(json_str)
+    # We need the input params for the second pass
+    d.update(LOUDNORM_PARAMS)
+    return d
+
+def loudnorm_filter(analysis_output):
+    return (
+        'loudnorm='
+        'print_format=summary:'
+        'linear=true:'
+        'i={i}:'
+        'lra={lra}:'
+        'tp={tp}:'
+        'measured_i={input_i}:'
+        'measured_lra={input_lra}:'
+        'measured_thresh={input_thresh}:'
+        'offset={target_offset}'
+    ).format(**analysis_output)
 
 def apply_loudnorm(filename, analysis_output):
     loudnorm = (
