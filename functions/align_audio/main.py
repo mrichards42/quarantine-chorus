@@ -78,6 +78,10 @@ def align_audio_files(ref_file, subj_file, out_file):
     # Analysis
     logging.info('Running cross-correlation analysis')
     analysis = run_alignment(ref, subj)
+    # Loudnorm
+    logging.info('Running loudnorm analysis')
+    loudnorm = align.loudnorm_analysis(subj_file, analysis['trim_seconds'])
+    analysis['loudnorm'] = loudnorm
     logging.info('Analysis output: %s', json.dumps(analysis))
     # Dump aligned file
     out = get_aligned_segment(subj, analysis)
