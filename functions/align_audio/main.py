@@ -117,7 +117,8 @@ def align_audio(data, context):
         analysis = align_audio_files(temp_ref, temp_subj, temp_out)
         # Send analysis to firestore
         logging.info('Saving analysis data to firestore')
-        ref = db.collection(SUBMISSIONS_COLLECTION).document(data['name'])
+        doc_name = str(Path(data['name']).with_suffix(''))
+        ref = db.collection(SUBMISSIONS_COLLECTION).document(doc_name)
         ref.set({'analysis': analysis}, merge=True)
         # Send output to cloud storage
         logging.info('Saving aligned audio file to %s',
