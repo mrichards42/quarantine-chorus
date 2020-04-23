@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import re
+import subprocess
 import tempfile
 from pathlib import Path
 
@@ -44,48 +45,54 @@ def reference_blob(object_name):
         logging.info('Reference file %s does not exist; trying for fallback',
                      gcs_url(AUDIO_BUCKET, name))
 
-def run_alignment(ref_segment, subj_segment):
-    assert ref_segment.frame_rate == subj_segment.frame_rate
-    samplerate = ref_segment.frame_rate
-    # Read and preprocess
-    ref_wav = np.array(ref_segment.get_array_of_samples())
-    subj_wav = np.array(subj_segment.get_array_of_samples())
-    ref_processed = align.Preprocessor(ref_wav).loudness_75()
-    subj_processed = align.Preprocessor(subj_wav).loudness_75()
-    # Cross-correlate
-    analysis, corr = align.cross_correlate(samplerate, ref_processed, subj_processed)
-    return analysis
-
-def get_aligned_segment(subj, analysis):
+def write_aligned_file(subj_file, out_file, analysis):
+    filters = []
     if analysis['pad'] > 0:
-        # Get silent samples
-        # pydub doesn't have a way to create silence in samples, so instead we
-        # create silence + 1 second and then slice to the exact length we want
-        silence = AudioSegment.silent(duration=(analysis['pad_seconds'] + 1) * 1000,
-                                      frame_rate=subj.frame_rate)
-        silence = silence.get_sample_slice(0, analysis['pad'])
-        return silence + subj
+        pad_ms = round(analysis['pad_seconds'] * 1000)
+        filters.append(f'adelay={pad_ms}|{pad_ms}')
     elif analysis['trim'] > 0:
-        return subj.get_sample_slice(analysis['trim'])
-    else:
-        return subj
+        filters.append(f'atrim={"%0.3f" % analysis["trim_seconds"]}')
+        # atrim messes with pts, so reset here
+        filters.append('asetpts=PTS-STARTPTS')
+    filters.append(align.loudnorm_filter(analysis['loudnorm']))
+    # loudnorm upsamples to 192k, which is excessive
+    filters.append(f'aresample=44100:first_pts=0')
+    # Run ffmpeg
+    cmd = ['ffmpeg', '-y', '-i', subj_file,
+           '-af', ','.join(filters),
+           '-c:a', 'aac', '-b:a', '128k', '-ac', '1',
+           out_file]
+    return subprocess.run(cmd,
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE,
+                          check=True)
 
 def align_audio_files(ref_file, subj_file, out_file):
+    # Read files
     logging.info('Reading reference file')
     ref = AudioSegment.from_file(ref_file, parameters=['-ar', '44100'])
     logging.info('Reading subject file')
     subj = AudioSegment.from_file(subj_file, parameters=['-ar', '44100'])
-    # Analysis
+    assert ref.frame_rate == subj.frame_rate
+    samplerate = ref.frame_rate
+    ref_wav = np.array(ref.get_array_of_samples())
+    subj_wav = np.array(subj.get_array_of_samples())
+    del ref, subj
+    # Preprocess
+    ref_processed = align.Preprocessor(ref_wav).loudness_75()
+    subj_processed = align.Preprocessor(subj_wav).loudness_75()
+    del ref_wav, subj_wav
+    # Cross-correlate
     logging.info('Running cross-correlation analysis')
-    analysis = run_alignment(ref, subj)
+    analysis, corr = align.cross_correlate(samplerate, ref_processed, subj_processed)
+    del ref_processed, subj_processed
     # Loudnorm
     logging.info('Running loudnorm analysis')
     loudnorm = align.loudnorm_analysis(subj_file, analysis['trim_seconds'])
     analysis['loudnorm'] = loudnorm
     logging.info('Analysis output: %s', json.dumps(analysis))
     # Dump aligned file
-    out = get_aligned_segment(subj, analysis)
-    out.export(out_file, format='mp4', bitrate='128k')
+    write_aligned_file(subj_file, out_file, analysis)
     return analysis
 
 def align_audio(data, context):
