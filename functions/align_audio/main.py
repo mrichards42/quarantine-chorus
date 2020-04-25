@@ -79,8 +79,8 @@ def align_audio_files(ref_file, subj_file, out_file):
     subj_wav = np.array(subj.get_array_of_samples())
     del ref, subj
     # Preprocess
-    ref_processed = align.Preprocessor(ref_wav).loudness_75()
-    subj_processed = align.Preprocessor(subj_wav).loudness_75()
+    ref_processed = align.Preprocessor(ref_wav).loudness_25()
+    subj_processed = align.Preprocessor(subj_wav).loudness_25()
     del ref_wav, subj_wav
     # Cross-correlate
     logging.info('Running cross-correlation analysis')

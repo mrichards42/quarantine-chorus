@@ -13,8 +13,8 @@ class Preprocessor:
     Algorithms:
 
     - none: no-op
-    - loudness: Selects the loudest N percent of samples. Everything below the
-      cutoff is silenced; everything above the cutoff is set to max gain.
+    - loudness: Selects samples in the loudest N percentile. Everything below
+      the cutoff is silenced; everything above the cutoff is set to max gain.
     """
     def __init__(self, wav):
         self.wav = wav
@@ -31,12 +31,15 @@ class Preprocessor:
         return np.clip(self.wav - cutoff, 0, 1) * max_sample
 
     def loudness_25(self):
+        """Selects the 25th percentile of samples (i.e. the loudest 75%)"""
         return self._loudness(0.25)
 
     def loudness_50(self):
+        """Selects the 50th percentile of samples (i.e. the loudest 50%)"""
         return self._loudness(0.5)
 
     def loudness_75(self):
+        """Selects the 75th percentile of samples (i.e. the loudest 25%)"""
         return self._loudness(0.75)
 
 def preprocess(wav_data, algorithm):
