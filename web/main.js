@@ -339,6 +339,7 @@
       submission: {
         song: val('song'),
         singing: val('singing'),
+        reference: val('reference') === "true",
         singers: singers,
         location: {
           city: val('city'),
