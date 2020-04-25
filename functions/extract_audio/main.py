@@ -4,14 +4,22 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from google.cloud import firestore
 from google.cloud import storage
 
 storage_client = storage.Client()
+db = firestore.Client()
 
 UPLOAD_BUCKET = os.environ['UPLOAD_BUCKET']
 AUDIO_BUCKET = os.environ['AUDIO_BUCKET']
+SUBMISSIONS_COLLECTION = os.environ['SUBMISSIONS_COLLECTION']
 
 logging.basicConfig(level=logging.INFO)
+
+def is_reference(object_name):
+    ref = db.collection(SUBMISSIONS_COLLECTION).document(object_name)
+    snapshot = ref.get(['reference'])
+    return snapshot.get('reference')
 
 def extract_audio(data, context):
     url = f"gs://{data['bucket']}/{data['name']}"
@@ -42,8 +50,13 @@ def extract_audio(data, context):
                        stdout=subprocess.PIPE,
                        stderr=subprocess.PIPE,
                        check=True)
-        logging.info('Uploading to %s', f'gs://{AUDIO_BUCKET}/{data["name"]}.m4a')
+        # Upload
         audio_bucket = storage_client.bucket(AUDIO_BUCKET)
+        if is_reference(data['name']):
+            lead_name = str(Path(data['name']).parent.joinpath('lead.m4a'))
+            logging.info('Uploading to %s', f'gs://{AUDIO_BUCKET}/{lead_name}')
+            audio_bucket.blob(lead_name).upload_from_filename(temp2)
+        logging.info('Uploading to %s', f'gs://{AUDIO_BUCKET}/{data["name"]}.m4a')
         audio_bucket.blob(data['name'] + '.m4a').upload_from_filename(temp2)
     except subprocess.CalledProcessError as err:
         logging.error('ffmpeg failure: %d', err.returncode)
