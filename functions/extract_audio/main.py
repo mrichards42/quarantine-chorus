@@ -19,7 +19,10 @@ logging.basicConfig(level=logging.INFO)
 def is_reference(object_name):
     ref = db.collection(SUBMISSIONS_COLLECTION).document(object_name)
     snapshot = ref.get(['reference'])
-    return snapshot.get('reference')
+    try:
+        return snapshot.get('reference')
+    except KeyError:
+        return False
 
 def extract_audio(data, context):
     url = f"gs://{data['bucket']}/{data['name']}"
