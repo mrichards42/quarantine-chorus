@@ -32,9 +32,15 @@ for d in functions/*; do
 
   if [[ "$local_md5" != "$remote_md5" ]]; then
     echo 'Updating function since contents have changed'
-    gcloud functions deploy "$function_name" \
-      --update-labels="$MD5_LABEL_KEY=$local_md5" \
-      --flags-file=deploy-flags.yml
+    if [[ -x "deploy.sh" ]]; then
+      ./deploy.sh "$function_name" \
+        --update-labels="$MD5_LABEL_KEY=$local_md5" \
+        --flags-file=deploy-flags.yml
+    else
+      gcloud functions deploy "$function_name" \
+        --update-labels="$MD5_LABEL_KEY=$local_md5" \
+        --flags-file=deploy-flags.yml
+    fi
   else
     echo 'Skipping update: function has not changed'
   fi
