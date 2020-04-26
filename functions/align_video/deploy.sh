@@ -9,7 +9,7 @@ echo 'Downloading ffmpeg'
 mkdir ffmpeg-static
 
 curl -sSL 'https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz' \
-  | tar -xvjf - -C 'ffmpeg-static'
+  | tar -xvJf - -C 'ffmpeg-static'
 
 ffmpeg=$(find . -type f -name ffmpeg)
 
