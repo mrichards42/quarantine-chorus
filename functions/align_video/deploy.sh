@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 # We rely on some filters added in ffmpeg 4, but the default distribution
 # includes an older version of ffmpeg
 echo 'Downloading ffmpeg'
