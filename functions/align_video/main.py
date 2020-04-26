@@ -16,7 +16,7 @@ ALIGNED_VIDEO_BUCKET = os.environ['ALIGNED_VIDEO_BUCKET']
 SUBMISSIONS_COLLECTION = os.environ['SUBMISSIONS_COLLECTION']
 
 # config
-FFMPEG = os.environ.get('FFMPEG', 'ffmpeg-static/ffmpeg-4.2.2-amd64-static/ffmpeg')
+FFMPEG = os.environ.get('FFMPEG', 'ffmpeg')
 SAMPLERATE = 48000
 VIDEO_SCALE = '-2:360'
 
