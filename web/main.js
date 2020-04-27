@@ -476,11 +476,20 @@
       });
   }
 
+  function tryReportValidity(form) {
+    try {
+      return submissionForm.reportValidity();
+    } catch(error) {
+      // IE doesn't support reportValidity
+      return true;
+    }
+  }
+
   submitBtn.addEventListener('click', function(e) {
     e.preventDefault();
     submissionForm.className = 'submitted';
 
-    if (submissionForm.reportValidity()) {
+    if (tryReportValidity(submissionForm)) {
       var data = form2json();
       var file = uploadInput.files[0];
       submit(data, file);
