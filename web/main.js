@@ -196,7 +196,7 @@
       return fetch(url, {
         method: 'PUT',
         headers: {
-          'Content-Range': '*.' + file.size,
+          'Content-Range': '*/' + file.size,
         }
       });
     }
