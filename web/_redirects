@@ -1,6 +1,8 @@
 # Global
 /submission/new  https://us-central1-mimetic-oxide-273915.cloudfunctions.net/upload_media  200
 
+/providence/new  /new.html  200
+
 # Specific songs
 
 # 37b

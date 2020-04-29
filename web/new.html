@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Providence Test Singing</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=Promise%2CObject.assign%2CString.prototype.includes%2CNumber.isNaN%2Cfetch"></script>
+    <script src="https://browser.sentry-cdn.com/5.15.4/bundle.min.js" integrity="sha384-Nrg+xiw+qRl3grVrxJtWazjeZmUwoSt0FAVsbthlJ5OMpx0G08bqIq3b/v0hPjhB" crossorigin="anonymous"></script>
+    <script>
+      Sentry.init({ dsn: 'https://87dbbb0965b541bcbdd8724e20839561@o380311.ingest.sentry.io/5205976' });
+    </script>
+    <!-- milligram css -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
+    <!-- custom styles -->
+    <link rel="stylesheet" href="/main.css">
+  </head>
+  <body>
+    <main class="wrapper" id="main">
+      <div class="container">
+        <h1 id="submissionTitle">Lead a song</h1>
+
+        <div id="submissionWrapper">
+
+          <h2>Instructions</h2>
+
+          <p>Record a video of you leading a song. Please frame the video with
+            at least part of your arm visible, so that other singers can follow
+            your lead. Feel free to sing any part you wish.</p>
+
+          <p>Once you have created a recording, use the form below to submit
+            it. Please leave this page open until your upload is complete.</p>
+
+          <!--
+          <h3>Need help keying?</h3>
+
+          <p>Unlike at a normal singing, we don't have a keyer! Try searching
+            for a recording of your song and listen to the key from the
+            recording. Please sound the key in your video so that other singers
+          can find their starting notes.</p>
+
+          <p>Here are some sites with a lot of recordings:</p>
+
+          <ul>
+            <li><a href="https://www.shapenotecds.com/">Shape Note CDs (aka Southern Field Recordings)</a>
+              Also try a
+              <a href="https://www.google.com/search?q=site%3Ashapenotecds.com">search</a>
+              for this site and your page number.</li>
+            <li><a href="http://phillysacredharp.org/learn/">Philly Sacred Harp</a>
+              Also try a
+              <a href="https://www.google.com/search?q=site%3Aphillysacredharp.org">search</a>
+              for this site and your page number.</li>
+            <li><a href="https://www.bostonsing.org/index/">BostonSing</a></li>
+            <li><a href="https://bandcamp.com/search?q=%22sacred%20harp%22">Bandcamp</a> (search for "sacred harp" and your page number)</li>
+            <li><a href="https://www.youtube.com/results?search_query=%22sacred+harp%22">YouTube</a> (search for "sacred harp" and your page number)</li>
+          </ul>
+          -->
+
+          <hr>
+
+          <h2>Submission Form</h2>
+
+          <form id="submissionForm">
+
+            <input type="hidden" name="singing">
+            <input type="hidden" name="reference" value="true">
+
+            <div class="container">
+              <div class="row">
+                <div class="column">
+                  <p>Please enter a page number from the Sacred Harp, including
+                    <code>t</code> for top or <code>b</code> for bottom, if it
+                    applies. Do not include the name of the song. For
+                    instance:</p>
+                  <ul>
+                    <li><code>37b</code> for Liverpool</li>
+                    <li><code>39t</code> for Detroit</li>
+                    <li><code>155</code> for Northfield (whole page)</li>
+                    <li><code>189</code> for Montgomery (starts on the bottom,
+                      but no <code>b</code> since there isn't a song on the top
+                      of 189)</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="row">
+                <div class="column column-25">
+                  <label>
+                    Page number
+                    <span class="required-star">*</span>
+                    <input type="text" name="song" required
+                                       pattern="\d{1,3}[tbTB]?">
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Media -->
+            <!-- TODO: list of acceptable extensions? -->
+            <div class="container">
+              <div class="row">
+                <div class="column">
+                  <label>
+                    Upload a video or audio file
+                    <span class="required-star">*</span>
+                  </label>
+                  <div id="media_upload">
+                    <input type="file"
+                           id="uploadInput"
+                           accept="audio/*,video/*"
+                           required>
+                    <label for="uploadInput" class="button">Browse</label>
+                    <span id="uploadDetails"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="column">
+                  <div id="uploadPreview">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Singers -->
+            <hr>
+            <fieldset>
+              <div class="container" id="singersContainer">
+                <div class="row singer" id="singer1">
+                  <div class="column">
+                    <label>
+                      Part
+                      <span class="required-star">*</span>
+                      <select name="part" required>
+                        <option value=""></option>
+                        <option value="bass">Bass</option>
+                        <option value="alto">Alto</option>
+                        <option value="tenor">Tenor</option>
+                        <option value="treble">Treble</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="column">
+                    <label>
+                      Name
+                      <input type="text" name="name">
+                    </label>
+                  </div>
+                  <div class="column">
+                    <label>
+                      Email
+                      <input type="email" name="email">
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <button id="addSinger">Add a singer</button>
+              <button id="removeSinger" disabled>Remove a singer</button>
+            </fieldset>
+
+            <!-- Location -->
+            <hr>
+            <fieldset id="location">
+              <div class="container">
+                <div class="row">
+                  <div class="column">
+                    <label>
+                      City
+                      <input type="text" name="city">
+                    </label>
+                  </div>
+                  <div class="column">
+                    <label>
+                      State/Province
+                      <input type="text" name="state">
+                    </label>
+                  </div>
+                  <div class="column">
+                    <label>
+                      Country
+                      <input type="text" name="country" autocomplete="address-level1">
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+
+            <button id="submit" class="button-primary">Submit</button>
+          </form>
+        </div>
+
+        <div id="uploadProgress" style="display:none">
+          <h2 id="progressTitle"></h2>
+          <p id="progressSubtitle"></p>
+          <div id="progressBar">
+            <div id="progress" style="width: 0"></div>
+          </div>
+          <p id="progressLog">Starting upload...</p>
+          <button id="uploadTryAgain" style="display:none">
+            Try again
+          </button>
+        </div>
+
+      </div>
+
+    </main>
+
+    <script>
+      (function() {
+        // parse the path
+        var path = location.pathname.substr(1).split('/');
+        if (path.length === 2) {
+          document.getElementsByName('singing')[0].value = path[0];
+        }
+      })();
+    </script>
+
+    <script src="/main.js"></script>
+  </body>
+</html>
