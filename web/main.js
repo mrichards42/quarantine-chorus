@@ -449,7 +449,12 @@
     return submissionRequest(formData)
       .then(function (response) {
         if (response.upload_url) {
-          return performUpload(response.upload_url, file);
+          // use our proxied upload
+          var url = response.upload_url.replace(
+            /^https:\/\/storage.googleapis.com\/upload\//,
+            '/upload/'
+          );
+          return performUpload(url, file);
         } else {
           throw new Error('bad response', response);
         }

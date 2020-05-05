@@ -1,5 +1,6 @@
 # Global
-/submission/new  https://us-central1-mimetic-oxide-273915.cloudfunctions.net/upload_media  200
+/submission/new  https://us-central1-mimetic-oxide-273915.cloudfunctions.net/upload_media  200!
+/upload/*  https://storage.googleapis.com/upload/:splat  200!
 
 /providence/new  /new.html  200
 
