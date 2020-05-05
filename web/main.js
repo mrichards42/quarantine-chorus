@@ -69,6 +69,11 @@
     }
   }
 
+  var ORIGINAL_TITLE = document.title;
+  function setTitlePrefix(str) {
+    document.title = str + ORIGINAL_TITLE;
+  }
+
   // === Singers ==============================================================
   var singersContainer = document.getElementById('singersContainer');
   var addSingerBtn = document.getElementById('addSinger');
@@ -385,8 +390,6 @@
     });
   }
 
-  var originalTitle = document.title;
-
   function performUpload(url, file) {
     var progress = document.getElementById('progress');
     var progressLog = document.getElementById('progressLog');
@@ -402,7 +405,7 @@
       if (res.done) {
         progressLog.textContent = 'Done ' + humanFileSize(file.size);
         progress.style.width = '100%';
-        document.title = '[100%] ' + originalTitle;
+        setTitlePrefix('[100%] ');
         return;
       }
       if (res.retriable) {
@@ -419,7 +422,7 @@
           + humanFileSize(res.progress) + ' of ' + humanFileSize(file.size)
           + ' (' + pct.toFixed(0) + '%)';
         progress.style.width = pct.toFixed(2) + '%';
-        document.title = '[' + pct.toFixed(0) + '%] ' + originalTitle;
+        setTitlePrefix('[' + pct.toFixed(0) + '%] ');
         // // calculate a new estimate
         // if (est.estimate()) {
         //   console.log('estimate off by', 100 * (res.progress - est.estimate()) / file.size);
@@ -502,6 +505,7 @@
       }).catch(function (e) {
         Sentry.captureException(e);
         progressTitle.textContent = 'Something went wrong!';
+        setTitlePrefix('[ERROR] ');
         if (e.message === 'bad response') {
           console.error('SUBMIT ERROR', e);
           progressSubtitle.textContent = 'Sorry, an error occurred while processing your submission. Please try again.'
