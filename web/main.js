@@ -250,6 +250,7 @@
           }
           // Out of 308 retries; fallthrough to 404 and start again
         case 404:
+        case 400: // sometimes the resumeRequest doesn't like the byte range
         default:
           if (tries < RETRY.max_tries) {
             // Rather than starting from the beginning, try again from the last
