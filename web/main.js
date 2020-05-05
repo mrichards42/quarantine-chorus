@@ -262,6 +262,8 @@
             var backoff = nextBackoff(tries, RETRY);
             return {
               retriable: true,
+              tries: tries,
+              max_tries: RETRY.max_tries,
               progress: 0,
               response: res,
               backoff: backoff,
@@ -289,6 +291,8 @@
             var backoff = nextBackoff(tries, RETRY);
             return {
               retriable: true,
+              tries: tries,
+              max_tries: RETRY.max_tries,
               response: res,
               next: function() {
                 return wrapRequest(wait(1000).then(resumeRequest));
@@ -400,7 +404,16 @@
         progress.style.width = '100%';
         document.title = '[100%] ' + originalTitle;
         return;
-      } else if (res.progress) {
+      }
+      if (res.retriable) {
+        if (res.tries) {
+          progressLog.textContent = "Upload error: retrying... "
+            + "(try " + res.tries + " of " + res.max_tries + ")"
+        } else {
+          progressLog.textContent = "Upload error: retrying...";
+        }
+      }
+      if (res.progress) {
         var pct = 100 * res.progress / file.size
         progressLog.textContent = 'Upload in progress... '
           + humanFileSize(res.progress) + ' of ' + humanFileSize(file.size)
