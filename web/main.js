@@ -189,6 +189,7 @@
     }
     var tries = 0;
     var tries308 = 0;
+    var last_start_byte = 0;
 
     function resumeRequest() {
       // Attempt to resume from wherever we left off
@@ -224,11 +225,12 @@
             // Chunk suceeeded: submit the next chunk
             tries308 = 0;
             var last_byte = parseInt(match[1]);
+            last_start_byte = last_byte + 1;
             return {
               progress: last_byte,
               response: res,
               next: function() {
-                return wrapRequest(uploadChunkRequest(url, file, last_byte + 1));
+                return wrapRequest(uploadChunkRequest(url, file, last_start_byte));
               }
             }
           } else if (tries308 < RETRY_308.max_tries) {
@@ -248,7 +250,11 @@
           }
           // Out of 308 retries; fallthrough to 404 and start again
         case 404:
+        default:
           if (tries < RETRY.max_tries) {
+            // Rather than starting from the beginning, try again from the last
+            // known good byte.
+            console.log('Unknown starting place; trying again from byte', last_start_byte);
             // Google doesn't know about this file: start from the beginning
             tries++;
             var backoff = nextBackoff(tries, RETRY);
@@ -259,7 +265,7 @@
               backoff: backoff,
               next: function() {
                 return wait(backoff).then(function() {
-                  return wrapRequest(uploadChunkRequest(url, file, 0));
+                  return wrapRequest(uploadChunkRequest(url, file, last_start_byte));
                 })
               }
             }
@@ -276,6 +282,7 @@
         case 504:
           // Retriable errors
           if (tries < RETRY.max_tries) {
+            console.log('Retrying from unknown position');
             tries++;
             var backoff = nextBackoff(tries, RETRY);
             return {
