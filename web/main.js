@@ -201,6 +201,10 @@
       });
     }
 
+    function wrapRequest(promise) {
+      return promise.then(handleResponse).catch(handleError);
+    }
+
     function handleResponse(res) {
       switch (res.status) {
         case 200:
@@ -224,7 +228,7 @@
               progress: last_byte,
               response: res,
               next: function() {
-                return uploadChunkRequest(url, file, last_byte + 1).then(handleResponse);
+                return wrapRequest(uploadChunkRequest(url, file, last_byte + 1));
               }
             }
           } else if (tries308 < RETRY_308.max_tries) {
@@ -238,7 +242,7 @@
               response: res,
               backoff: backoff,
               next: function() {
-                return wait(backoff).then(resumeRequest).then(handleResponse);
+                return wrapRequest(wait(backoff).then(resumeRequest));
               }
             }
           }
@@ -255,7 +259,7 @@
               backoff: backoff,
               next: function() {
                 return wait(backoff).then(function() {
-                  return uploadChunkRequest(url, file, 0).then(handleResponse);
+                  return wrapRequest(uploadChunkRequest(url, file, 0));
                 })
               }
             }
@@ -278,7 +282,7 @@
               retriable: true,
               response: res,
               next: function() {
-                return wait(1000).then(resumeRequest).then(handleResponse);
+                return wrapRequest(wait(1000).then(resumeRequest));
               }
             }
           } else {
@@ -296,7 +300,7 @@
       return handleResponse({status: 408});
     }
 
-    return uploadChunkRequest(url, file, 0).then(handleResponse).catch(handleError);
+    return wrapRequest(uploadChunkRequest(url, file, 0));
   }
 
   // == Beforeunload Listener =================================================
