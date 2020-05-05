@@ -180,7 +180,8 @@
 
   function initUpload(url, file) {
     var RETRY = {
-      max_tries: 30,
+      // This results in ~2.5 minutes of total retries
+      max_tries: 10,
       backoff: 1000,
     }
     var RETRY_308 = {
