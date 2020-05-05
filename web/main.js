@@ -449,6 +449,8 @@
       updateProgress(res)
       if (res.next) {
         return res.next().then(handleResponse);
+      } else if (res.error) {
+        throw new Error(res.error, res);
       } else {
         return res
       }
