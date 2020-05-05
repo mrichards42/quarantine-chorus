@@ -453,7 +453,7 @@
       if (res.next) {
         return res.next().then(handleResponse);
       } else if (res.error) {
-        throw new Error(res.error, res);
+        throw new Error(res.error);
       } else {
         return res
       }
@@ -494,7 +494,8 @@
           );
           return performUpload(url, file);
         } else {
-          throw new Error('bad response', response);
+          console.log('bad response', response);
+          throw new Error('bad response');
         }
       }).then(function (response) {
         console.log('UPLOAD COMPLETE', response);
