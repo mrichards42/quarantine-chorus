@@ -6,7 +6,10 @@
 
 # Specific songs
 
-# 37b
-/providence/37b/submit  /submission.html  200
-/providence/37b/lead  https://storage.googleapis.com/quarantine-chorus-upload/providence/37b/lead.mp4 200
 
+
+## Complete songs
+
+# 37b
+/providence/37b/mix-video  https://www.youtube-nocookie.com/embed/eatv2Lvi5jc?modestbranding=1&rel=0
+/providence/37b/*  /mix.html  200
