@@ -4,8 +4,15 @@
 
 /providence/new  /new.html  200
 
-# Specific songs
+## In progress songs
 
+# 347
+/providence/347/submit      /submission.html  200
+/providence/347/lead-video  https://www.youtube-nocookie.com/embed/vGw0WQtfPD0?modestbranding=1&rel=0
+
+# 217
+/providence/217/submit      /submission.html  200
+/providence/217/lead-video  https://www.youtube-nocookie.com/embed/n9tp0Ly8Khw?modestbranding=1&rel=0
 
 
 ## Complete songs
