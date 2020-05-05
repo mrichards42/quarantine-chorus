@@ -290,7 +290,13 @@
       }
     }
 
-    return uploadChunkRequest(url, file, 0).then(handleResponse);
+    function handleError(e) {
+      console.log("fetch error", e)
+      // Try again as if this request timed out
+      return handleResponse({status: 408});
+    }
+
+    return uploadChunkRequest(url, file, 0).then(handleResponse).catch(handleError);
   }
 
   // == Beforeunload Listener =================================================
