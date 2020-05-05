@@ -162,7 +162,7 @@
   }
 
   function uploadChunkRequest(url, file, start_byte) {
-    var chunkSize = bestChunkSize(start_byte, file.size);
+    var chunkSize = Math.max(MIN_CHUNK, bestChunkSize(start_byte, file.size));
     var chunk = file.slice(start_byte, start_byte + chunkSize);
     var end_byte = start_byte + chunk.size - 1;
     var byte_range = start_byte + '-' + end_byte + '/' + file.size;
@@ -461,7 +461,7 @@
     return initUpload(url, file).then(handleResponse);
   }
 
-  function submit(formData, file) {
+  function submit(formData, file, tryNumber) {
 
     Sentry.configureScope(function(scope) {
       scope.setExtra("form_data", JSON.stringify(formData));
@@ -478,6 +478,7 @@
     progressPanel.style.display = 'block';
     var start = new Date();
     console.log('start', start);
+    console.log('try number', tryNumber);
 
     progressTitle.textContent = 'Uploading your submission';
     progressSubtitle.textContent = 'Please leave this window open until your upload is complete';
@@ -535,15 +536,22 @@
     if (tryReportValidity(submissionForm)) {
       var data = form2json();
       var file = uploadInput.files[0];
-      submit(data, file);
+      submit(data, file, 0);
     }
   })
 
+  var tryAgainCount = 0;
   tryAgainBtn.addEventListener('click', function(e) {
     e.preventDefault();
     // assume the form is correct
     var data = form2json();
     var file = uploadInput.files[0];
-    submit(data, file);
+    // HACK: adjust the min chunk size if we're retrying
+    if (tryAgainCount == 0) {
+      MIN_CHUNK = 5 * MB;        // give ourselves 1 retry at a normal-ish rate
+    } else {
+      MIN_CHUNK = 5 * 1024 * MB; // after that, send the whole file at once
+    }
+    submit(data, file, ++tryAgainCount);
   })
 })()
