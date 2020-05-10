@@ -369,6 +369,7 @@
         singing: val('singing'),
         reference: val('reference') === "true",
         singers: singers,
+        comment: val('comment'),
         location: {
           city: val('city'),
           state: val('state'),

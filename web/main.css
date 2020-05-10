@@ -52,6 +52,10 @@ video, audio {
   display: none;
 }
 
+textarea {
+  resize: vertical;
+}
+
 /* Modal */
 /* Styles borrowed from https://github.com/gdkraus/accessible-modal-dialog */
 #modalOverlay {
