@@ -30,6 +30,7 @@ def upload_media(request):
         * participants (list of names and parts)
         * location (city, state, country)
         * reference (true for the reference recording for a given part)
+        * comment (free text)
 
     Submission data will be stored in a firebase database.
 
