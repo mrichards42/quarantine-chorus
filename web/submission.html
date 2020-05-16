@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Providence Test Singing</title>
+    <title>Virtual Singing</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://polyfill.io/v3/polyfill.min.js?features=Promise%2CObject.assign%2CString.prototype.includes%2CNumber.isNaN%2Cfetch"></script>
     <script src="https://browser.sentry-cdn.com/5.15.4/bundle.min.js" integrity="sha384-Nrg+xiw+qRl3grVrxJtWazjeZmUwoSt0FAVsbthlJ5OMpx0G08bqIq3b/v0hPjhB" crossorigin="anonymous"></script>
@@ -119,8 +119,8 @@
             </fieldset>
 
             <!-- Location -->
-            <!-- <hr> -->
             <fieldset id="location">
+              <hr>
               <div class="container">
                 <div class="row">
                   <div class="column">
@@ -182,6 +182,15 @@
           document.getElementsByName('song')[0].value = path[1];
           document.getElementById('submissionTitle').textContent =
             "Welcome! We're singing " + path[1];
+          // singing-specific stuff
+          if (path[0] === 'providence') {
+            document.getElementById('location').style.display = 'none';
+            document.title = 'Providence Virtual Singing';
+          } else if (path[0] === 'CH') {
+            document.title = 'Christian Harmony Virtual Singing';
+            document.getElementById('submissionTitle').textContent =
+              "Welcome! We're singing " + path[1] + " in the Christian Harmony";
+          }
         }
       })();
     </script>

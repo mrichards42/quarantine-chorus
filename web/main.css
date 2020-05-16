@@ -47,11 +47,6 @@ video, audio {
   color: red;
 }
 
-/* For a small group, don't bother with location */
-#location {
-  display: none;
-}
-
 textarea {
   resize: vertical;
 }
