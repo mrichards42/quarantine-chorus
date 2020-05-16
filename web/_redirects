@@ -5,6 +5,9 @@
 /providence/new  /new.html  200
 /CH/new  /new.html  200
 
+# Fallback
+/submission/fallback  https://www.dropbox.com/request/VbdKmEISk2CjDiBlHNOm
+
 ## In progress songs
 
 # 347

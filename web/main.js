@@ -336,6 +336,8 @@
   submissionForm.reset();
   var submitBtn = document.getElementById('submit');
   var tryAgainBtn = document.getElementById('uploadTryAgain');
+  var uploadTrouble = document.getElementById('uploadTrouble');
+  var tryAgainCount = 0;
 
   function form2json() {
     function vals(name) {
@@ -475,6 +477,7 @@
     submissionWrapper.setAttribute('aria-hidden', true);
     submissionWrapper.style.display = 'none';
     tryAgainBtn.style.display = 'none';
+    uploadTrouble.style.display = 'none';
     progressPanel.setAttribute('aria-hidden', false);
     progressPanel.style.display = 'block';
     var start = new Date();
@@ -517,6 +520,9 @@
           progressSubtitle.textContent = 'Sorry, an error occurred while uploading your file. Please try again.'
         }
         tryAgainBtn.style.display = 'block';
+        if (tryAgainCount >= 1) {
+          uploadTrouble.style.display = 'block';
+        }
       }).finally(function () {
         window.removeEventListener('beforeunload', promptBeforeUnload);
       });
@@ -542,7 +548,6 @@
     }
   })
 
-  var tryAgainCount = 0;
   tryAgainBtn.addEventListener('click', function(e) {
     e.preventDefault();
     // assume the form is correct
