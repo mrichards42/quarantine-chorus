@@ -3,6 +3,7 @@
 /upload/*  https://storage.googleapis.com/upload/:splat  200!
 
 /providence/new  /new.html  200
+/CH/new  /new.html  200
 
 ## In progress songs
 
