@@ -165,8 +165,8 @@
             </fieldset>
 
             <!-- Location -->
-            <!-- <hr> -->
             <fieldset id="location">
+              <hr>
               <div class="container">
                 <div class="row">
                   <div class="column">
@@ -213,6 +213,16 @@
           <button id="uploadTryAgain" style="display:none">
             Try again
           </button>
+
+          <div id="uploadTrouble" style="display:none">
+            <h3>Still having trouble?</h3>
+            <p>
+              Sorry about that. Try uploading your file to Dropbox using
+              <a href="/submission/fallback">
+                this link
+              </a> instead.
+            </p>
+          </div>
         </div>
 
       </div>
@@ -225,6 +235,13 @@
         var path = location.pathname.substr(1).split('/');
         if (path.length === 2) {
           document.getElementsByName('singing')[0].value = path[0];
+        }
+        // singing-specific stuff
+        if (path[0] === 'providence') {
+          document.getElementById('location').style.display = 'none';
+          document.title = 'Providence Virtual Singing';
+        } else if (path[0] === 'CH') {
+          document.title = 'Christian Harmony Virtual Singing';
         }
       })();
     </script>
