@@ -30,6 +30,17 @@ def find_part(object_name):
     if m:
         return m.group(0)
 
+def singer_count(object_name):
+    # TODO: kind of a hack that won't always work, but should be a reasonable
+    # heuristic for now. We should be pulling this data from firestore.
+    basename = Path(object_name).name
+    try:
+        parts = re.match(r'(_?(alto|bass|tenor|treble))+', basename).group().split('_')
+        singers = re.findall(r'_\w+[.]\s+', basename)
+        return max(len(parts), len(singers))
+    except Exception:
+        return 1
+
 def reference_blob(object_name):
     path = str(Path(object_name).parent)
     part = find_part(Path(object_name).name)
@@ -67,7 +78,7 @@ def write_aligned_file(subj_file, out_file, analysis):
                           stderr=subprocess.PIPE,
                           check=True)
 
-def align_audio_files(ref_file, subj_file, out_file):
+def align_audio_files(ref_file, subj_file, out_file, singer_count):
     # Read files
     logging.info('Reading reference file')
     ref = AudioSegment.from_file(ref_file, parameters=['-ar', '44100'])
@@ -88,7 +99,7 @@ def align_audio_files(ref_file, subj_file, out_file):
     del ref_processed, subj_processed
     # Loudnorm
     logging.info('Running loudnorm analysis')
-    loudnorm = align.loudnorm_analysis(subj_file, analysis['trim_seconds'])
+    loudnorm = align.loudnorm_analysis(subj_file, analysis['trim_seconds'], singer_count)
     analysis['loudnorm'] = loudnorm
     logging.info('Analysis output: %s', json.dumps(analysis))
     # Dump aligned file
@@ -125,7 +136,8 @@ def align_audio(data, context):
         subj_blob.download_to_filename(temp_subj)
         # Analyze and align subject
         logging.info('Aligning audio files %s', url)
-        analysis = align_audio_files(temp_ref, temp_subj, temp_out)
+        analysis = align_audio_files(temp_ref, temp_subj, temp_out,
+                                     singer_count(subj_blob.name))
         # Send analysis to firestore
         logging.info('Saving analysis data to firestore')
         doc_name = str(Path(data['name']).with_suffix(''))
