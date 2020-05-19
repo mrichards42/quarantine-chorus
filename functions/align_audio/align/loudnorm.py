@@ -6,12 +6,12 @@ import subprocess
 
 LOUDNORM_PARAMS = {
     1: {
-        'i': '-16',
+        'i': '-22',
         'tp': '-1.5',
         'lra': '11',
     },
     2: {
-        'i': '-10',  # louder with 2+ singers
+        'i': '-16',  # louder with 2+ singers
         'tp': '-1.5',
         'lra': '11',
     },
