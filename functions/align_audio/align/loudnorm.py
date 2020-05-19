@@ -53,6 +53,7 @@ def loudnorm_filter(analysis_output):
         'tp={tp}:'
         'measured_i={input_i}:'
         'measured_lra={input_lra}:'
+        'measured_tp={input_tp}:'
         'measured_thresh={input_thresh}:'
         'offset={target_offset}'
     ).format(**analysis_output)
@@ -66,6 +67,7 @@ def apply_loudnorm(filename, analysis_output, singer_count=1):
         'lra={lra}:'
         'tp={tp}:'
         'measured_i={input_i}:'
+        'measured_tp={input_tp}:'
         'measured_lra={input_lra}:'
         'measured_thresh={input_thresh}:'
         'offset={target_offset}'
