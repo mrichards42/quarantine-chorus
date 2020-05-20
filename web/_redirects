@@ -8,15 +8,8 @@
 # Fallback
 /submission/fallback  https://www.dropbox.com/request/VbdKmEISk2CjDiBlHNOm
 
+
 ## In progress songs
-
-# 347
-/providence/347/submit      /submission.html  200
-/providence/347/lead-video  https://www.youtube-nocookie.com/embed/Tr5NFC-MdOI?modestbranding=1&rel=0
-
-# 217
-/providence/217/submit      /submission.html  200
-/providence/217/lead-video  https://www.youtube-nocookie.com/embed/dhSeUDVmOp4?modestbranding=1&rel=0
 
 # CH131
 /CH/131/submit      /submission.html  200
@@ -27,3 +20,11 @@
 # 37b
 /providence/37b/mix-video  https://www.youtube-nocookie.com/embed/eatv2Lvi5jc?modestbranding=1&rel=0
 /providence/37b/*  /mix.html  200
+
+# 347
+/providence/347/mix-video  https://www.youtube-nocookie.com/embed/Lmnf55uBX4M?modestbranding=1&rel=0
+/providence/347/*          /mix.html  200
+
+# 217
+/providence/217/mix-video  https://www.youtube-nocookie.com/embed/zCzPQUchNJ0?modestbranding=1&rel=0
+/providence/217/*          /mix.html  200
