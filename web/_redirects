@@ -11,9 +11,6 @@
 
 ## In progress songs
 
-# CH131
-/CH/131/submit      /submission.html  200
-/CH/131/lead-video  https://www.youtube-nocookie.com/embed/gzzYMu9ja9w?modestbranding=1&rel=0
 
 ## Complete songs
 
@@ -28,3 +25,7 @@
 # 217
 /providence/217/mix-video  https://www.youtube-nocookie.com/embed/zCzPQUchNJ0?modestbranding=1&rel=0
 /providence/217/*          /mix.html  200
+
+# CH131
+/CH/131/mix-video  https://www.youtube-nocookie.com/embed/evwwmWrJhUI?modestbranding=1&rel=0
+/CH/131/*          /mix.html  200
