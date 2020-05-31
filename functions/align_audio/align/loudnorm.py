@@ -11,7 +11,7 @@ LOUDNORM_PARAMS = {
         'lra': '11',
     },
     2: {
-        'i': '-16',  # louder with 2+ singers
+        'i': '-17',  # louder with 2+ singers
         'tp': '-1.5',
         'lra': '11',
     },
