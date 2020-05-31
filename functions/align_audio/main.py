@@ -6,8 +6,8 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+import ffmpeg
 import numpy as np
-from pydub import AudioSegment
 from google.cloud import firestore
 from google.cloud import storage
 
@@ -78,17 +78,26 @@ def write_aligned_file(subj_file, out_file, analysis):
                           stderr=subprocess.PIPE,
                           check=True)
 
+
+def read_wav(filename, samplerate):
+    """Reads PCM audio from a file, returning a numpy array."""
+    # This is both faster (slightly) and uses less memory (significantly) than doing
+    # this via pydub.AudioSegment
+    proc = (ffmpeg
+            .input(filename)
+            .output('-', format='s16le', acodec='pcm_s16le', ac=1, ar=samplerate)
+            .overwrite_output()
+            .run_async(pipe_stdout=True, pipe_stderr=True))
+    return np.frombuffer(proc.stdout.read(), dtype=np.dtype('<i2'))
+
+
 def align_audio_files(ref_file, subj_file, out_file, singer_count):
     # Read files
+    samplerate = 44100
     logging.info('Reading reference file')
-    ref = AudioSegment.from_file(ref_file, parameters=['-ar', '44100'])
+    ref_wav = read_wav(ref_file, samplerate)
     logging.info('Reading subject file')
-    subj = AudioSegment.from_file(subj_file, parameters=['-ar', '44100'])
-    assert ref.frame_rate == subj.frame_rate
-    samplerate = ref.frame_rate
-    ref_wav = np.array(ref.get_array_of_samples())
-    subj_wav = np.array(subj.get_array_of_samples())
-    del ref, subj
+    subj_wav = read_wav(subj_file, samplerate)
     # Preprocess
     ref_processed = align.Preprocessor(ref_wav).loudness_25()
     subj_processed = align.Preprocessor(subj_wav).loudness_25()
