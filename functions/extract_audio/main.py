@@ -1,71 +1,64 @@
+"""Extract Audio Cloud Function"""
+
 import logging
 import os
-import subprocess
-import tempfile
-from pathlib import Path
+from tempfile import TemporaryDirectory
 
-from google.cloud import firestore
-from google.cloud import storage
-
-storage_client = storage.Client()
-db = firestore.Client()
-
-UPLOAD_BUCKET = os.environ['UPLOAD_BUCKET']
-AUDIO_BUCKET = os.environ['AUDIO_BUCKET']
-SUBMISSIONS_COLLECTION = os.environ['SUBMISSIONS_COLLECTION']
+from quarantine_chorus import ffmpeg
+from quarantine_chorus.submission import Submission
 
 logging.basicConfig(level=logging.INFO)
 
-def is_reference(object_name):
-    ref = db.collection(SUBMISSIONS_COLLECTION).document(object_name)
-    snapshot = ref.get(['reference'])
-    try:
-        return snapshot.get('reference')
-    except KeyError:
-        return False
 
-def extract_audio(data, context):
-    url = f"gs://{data['bucket']}/{data['name']}"
-    blob = storage_client.bucket(data['bucket']).get_blob(data['name'])
+def extract_audio_to_file(in_file, out_file, cfg):
+    return (
+        ffmpeg.input(in_file)
+        .audio
+        .filter('aresample', cfg.get('samplerate', 48000))
+        .filter('asetpts', 'PTS-STARTPTS')
+        .output(
+            out_file,
+            acodec=cfg.get('codec', 'aac'),
+            audio_bitrate=cfg.get('bitrate', '128k'),
+            ac=1,
+        )
+        .run(overwrite_output=True)
+    )
 
-    if not blob:
-        logging.warning('Blob %s does not exist! Aborting.', url)
-        return
 
-    _, temp1 = tempfile.mkstemp(Path(data['name']).suffix)
-    _, temp2 = tempfile.mkstemp('.m4a')
-    try:
-        logging.info('Downloading %s', url)
-        # A lot of video formats don't support piping (e.g. mp4), so while
-        # downloading the whole file is inefficient, it's pretty much the only
-        # way to do it.
-        blob.download_to_filename(temp1)
-        # encode to aac
-        logging.info('Extracting audio to %s', temp2)
-        subprocess.run(['ffmpeg', '-y',
-                        '-i', temp1,
-                        '-vn',
-                        '-c:a', 'aac',
-                        '-b:a', '128k',
-                        '-af', 'aresample=44100:first_pts=0',
-                        '-ac', '1',
-                        temp2],
-                       stdout=subprocess.PIPE,
-                       stderr=subprocess.PIPE,
-                       check=True)
+def main(data, context):
+    submission = Submission.from_bucket_trigger(data, context)
+    video = submission.video_upload
+    audio = submission.audio_extracted
+
+    # Get the uploaded video
+    if not video.exists():
+        return f"Blob {video.url} does not exist!"
+
+    with TemporaryDirectory() as tempdir:
+        os.chdir(tempdir)
+        logging.info('In temp dir: %s', tempdir)
+
+        # A lot of video formats don't support piping (e.g. mp4), so while downloading
+        # the whole file is inefficient, it's pretty much the only way to do it.
+        logging.info("Downloading %s", video.url)
+        video.download(video.filename)
+
+        # Extract
+        audio_cfg = submission.song_config()['audio']
+        logging.info("Extracting audio to %s", audio.filename)
+        extract_audio_to_file(video.filename, audio.filename, audio_cfg)
+
         # Upload
-        audio_bucket = storage_client.bucket(AUDIO_BUCKET)
-        if is_reference(data['name']):
-            lead_name = str(Path(data['name']).parent.joinpath('lead.m4a'))
-            logging.info('Uploading to %s', f'gs://{AUDIO_BUCKET}/{lead_name}')
-            audio_bucket.blob(lead_name).upload_from_filename(temp2)
-        logging.info('Uploading to %s', f'gs://{AUDIO_BUCKET}/{data["name"]}.m4a')
-        audio_bucket.blob(data['name'] + '.m4a').upload_from_filename(temp2)
-    except subprocess.CalledProcessError as err:
-        logging.error('ffmpeg failure: %d', err.returncode)
-        logging.error('cmd: %s', err.cmd)
-        logging.error('stdout: %s', err.stdout)
-        logging.error('stderr: %s', err.stderr)
-    finally:
-        os.remove(temp1)
-        os.remove(temp2)
+        logging.info("Uploading to %s", submission.audio_extracted.url)
+        audio.upload(audio.filename)
+
+        if submission.is_reference():
+            logging.info("Reference submission: creating reference files.")
+            for reference in submission.audio_reference_candidates():
+                # Note: it would be more efficient to use bucket.copy_blob()
+                # https://googleapis.dev/python/storage/latest/buckets.html#google.cloud.storage.bucket.Bucket.copy_blob
+                # But it's nice to be able to run this using a LocalSubmission, and
+                # we'd have to reimplement the copy function.
+                logging.info("Uploading to %s", reference.url)
+                reference.upload(audio.filename)
