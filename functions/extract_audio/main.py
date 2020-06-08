@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 from quarantine_chorus import ffmpeg
 from quarantine_chorus.submission import Submission
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 
 def extract_audio_to_file(in_file, out_file, cfg):
