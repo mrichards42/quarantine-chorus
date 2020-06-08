@@ -14,6 +14,10 @@ MD5_LABEL_KEY='content-hash-md5'
 for d in functions/*; do
   pushd "$d"
 
+  # Replace all symlinks with copies of their original
+  find . -maxdepth 1 -type l \
+    -exec sh -c 'original=$(readlink "$1"); rm "$1"; cp -R "$original" "$1"' _ {} \;
+
   function_name=$(basename "$d")
   echo "Checking function '$function_name' for updates"
 
