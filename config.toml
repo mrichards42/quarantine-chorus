@@ -1,0 +1,52 @@
+[gcs.bucket]
+video_upload = "quarantine-chorus-upload"
+audio_extracted = "quarantine-chorus-audio-extracted"
+audio_aligned = "quarantine-chorus-audio-aligned"
+video_aligned = "quarantine-chorus-aligned"
+
+[gcs.collection]
+submissions = "submissions"
+
+
+# Singing defaults
+
+[singing.default.audio]
+extension = "m4a"
+codec = "aac"
+bitrate = "128k"
+samplerate = 48000
+loudnorm = true
+
+[singing.default.video]
+extension = "mp4"
+samplerate = 48000
+framerate = 30
+loudnorm = true
+resize = {width = -2, height = 360} # resize proportionally, width multiple of 2
+
+[singing.default.correlation]
+preprocess = "loudness_25"
+samplerate = 24000
+# other available keys (see quarantine_chorus.align.cross_correlate)
+# min_shift = -30      # min shift samples
+# max_shift = 30       # max shift samples
+
+[singing.default.loudnorm]
+i = -22
+tp = -.15
+lra = 12
+
+# Make two singers louder
+[singing.default.loudnorm.multiple_singers]
+i = -17
+tp = -.15
+lra = 12
+
+# Singing overrides
+
+[singing.providence]
+
+[singing.quarantine_chorus]
+audio.loudnorm = false
+video.loudnorm = false
+video.resize = {width = -2, height = 480}
