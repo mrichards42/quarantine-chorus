@@ -7,10 +7,14 @@ import funcy as F
 def log_return(call, level):
     """A decorator that logs non-None return values."""
     import logging
-    result = call()
-    if result is not None:
-        logging.log(level, "%s", result)
-    return result
+    try:
+        result = call()
+        if result is not None:
+            logging.log(level, "%s", result)
+        return result
+    except Exception:
+        logging.exception("Exception in %s", call._func.__name__)
+        raise
 
 
 class static_cached_property:
