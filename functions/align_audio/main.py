@@ -1,163 +1,91 @@
-import json
+"""Align Audio Cloud Function"""
+
 import logging
 import os
-import re
-import subprocess
-import tempfile
-from pathlib import Path
+from tempfile import TemporaryDirectory
 
-import ffmpeg
-import numpy as np
-from google.cloud import firestore
-from google.cloud import storage
+import funcy as F
 
-import align
+from quarantine_chorus import ffmpeg
+from quarantine_chorus.submission import Submission
+import quarantine_chorus.align as align
 
-storage_client = storage.Client()
-db = firestore.Client()
-
-AUDIO_BUCKET = os.environ['AUDIO_BUCKET']
-ALIGNED_AUDIO_BUCKET = os.environ['ALIGNED_AUDIO_BUCKET']
-SUBMISSIONS_COLLECTION = os.environ['SUBMISSIONS_COLLECTION']
-
-logging.basicConfig(level=logging.INFO)
-
-def gcs_url(bucket, object_name):
-    return f'gs://{bucket}/{object_name}'
-
-def find_part(object_name):
-    m = re.search(r'^((^|_)(alto|bass|tenor|treble))+', object_name)
-    if m:
-        return m.group(0)
-
-def singer_count(object_name):
-    # TODO: kind of a hack that won't always work, but should be a reasonable
-    # heuristic for now. We should be pulling this data from firestore.
-    basename = Path(object_name).name
-    try:
-        parts = re.match(r'(_?(alto|bass|tenor|treble))+', basename).group().split('_')
-        singers = re.findall(r'_\w+[.]\s+', basename)
-        return max(len(parts), len(singers))
-    except Exception:
-        return 1
-
-def reference_blob(object_name):
-    path = str(Path(object_name).parent)
-    part = find_part(Path(object_name).name)
-    if not part:
-        logging.warning('Unable to find part in object %s', object_name)
-        return
-    bucket = storage_client.bucket(AUDIO_BUCKET)
-    names = [part + '_lead.m4a', 'lead.m4a']
-    for name in names:
-        blob = bucket.get_blob(path + '/' + name)
-        if blob:
-            return blob
-        logging.info('Reference file %s does not exist; trying for fallback',
-                     gcs_url(AUDIO_BUCKET, name))
-
-def write_aligned_file(subj_file, out_file, analysis):
-    filters = []
-    if analysis['pad'] > 0:
-        pad_ms = round(analysis['pad_seconds'] * 1000)
-        filters.append(f'adelay={pad_ms}|{pad_ms}')
-    elif analysis['trim'] > 0:
-        filters.append(f'atrim={"%0.3f" % analysis["trim_seconds"]}')
-        # atrim messes with pts, so reset here
-        filters.append('asetpts=PTS-STARTPTS')
-    filters.append(align.loudnorm_filter(analysis['loudnorm']))
-    # loudnorm upsamples to 192k, which is excessive
-    filters.append(f'aresample=44100:first_pts=0')
-    # Run ffmpeg
-    cmd = ['ffmpeg', '-y', '-i', subj_file,
-           '-af', ','.join(filters),
-           '-c:a', 'aac', '-b:a', '128k', '-ac', '1',
-           out_file]
-    return subprocess.run(cmd,
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE,
-                          check=True)
+logging.basicConfig(level=logging.DEBUG)
 
 
-def read_wav(filename, samplerate):
-    """Reads PCM audio from a file, returning a numpy array."""
-    # This is both faster (slightly) and uses less memory (significantly) than doing
-    # this via pydub.AudioSegment
-    proc = (ffmpeg
-            .input(filename)
-            .output('-', format='s16le', acodec='pcm_s16le', ac=1, ar=samplerate)
-            .overwrite_output()
-            .run_async(pipe_stdout=True, pipe_stderr=True))
-    return np.frombuffer(proc.stdout.read(), dtype=np.dtype('<i2'))
+# Turns out that cross-correlation is pretty expensive in terms of memory. Sample rate
+# is directly correlated with how much memory the cross-correlation uses, so rather
+# than picking a normal sample rate for audio, we'll go with a lower rate to keep
+# memory usage down. The loudness-based preprocessing algorithms aren't concerned with
+# audio quality since they transform the audio into essentially a boolean (silent or
+# not). I expect each time sample rate is cut in half we might lose a couple samples of
+# accuracy in the final shift, but since we have to round the shift to milliseconds for
+# ffmpeg anyways, it shouldn't make any difference in practice.
+ANALYSIS_SAMPLERATE = 24000
 
 
-def align_audio_files(ref_file, subj_file, out_file, singer_count):
-    # Read files
-    samplerate = 44100
-    logging.info('Reading reference file')
-    ref_wav = read_wav(ref_file, samplerate)
-    logging.info('Reading subject file')
-    subj_wav = read_wav(subj_file, samplerate)
-    # Preprocess
-    ref_processed = align.Preprocessor(ref_wav).loudness_25()
-    subj_processed = align.Preprocessor(subj_wav).loudness_25()
-    del ref_wav, subj_wav
-    # Cross-correlate
-    logging.info('Running cross-correlation analysis')
-    analysis, corr = align.cross_correlate(samplerate, ref_processed, subj_processed)
-    del ref_processed, subj_processed
-    # Loudnorm
-    logging.info('Running loudnorm analysis')
-    loudnorm = align.loudnorm_analysis(subj_file, analysis['trim_seconds'], singer_count)
-    analysis['loudnorm'] = loudnorm
-    logging.info('Analysis output: %s', json.dumps(analysis))
-    # Dump aligned file
-    write_aligned_file(subj_file, out_file, analysis)
-    return analysis
+def loudnorm_analysis(subj_file, singer_count, cfg):
+    params = cfg if singer_count == 1 else cfg.get('multiple_singers', cfg)
+    logging.info("Running loudnorm analysis for %d singer(s)", singer_count)
+    return ffmpeg.run_loudnorm_analysis(subj_file, params)
 
-def align_audio(data, context):
-    # Find subject
-    url = gcs_url(data['bucket'], data['name'])
-    subj_blob = storage_client.bucket(data['bucket']).get_blob(data['name'])
-    logging.info('Triggered with %s', url)
-    if not subj_blob:
-        logging.warning('Blob %s does not exist! Aborting.', url)
-        return
 
-    # Find reference
-    ref_blob = reference_blob(subj_blob.name)
-    if ref_blob:
-        logging.info('Found reference audio %s',
-                     gcs_url(ref_blob.bucket.name, ref_blob.name))
-    if not ref_blob:
-        logging.warning('Unable to find appropriate reference audio! Aborting.')
-        return
+def write_aligned_audio(in_file, out_file, analysis, cfg):
+    audio = ffmpeg.input(in_file).audio.align_audio(analysis)
+    if analysis.get('loudnorm'):
+        audio = audio.loudnorm(analysis['loudnorm'],
+                               resample=cfg.get('samplerate', 48000))
+    return audio.output(out_file, ac=1).run(overwrite_output=True)
 
-    _, temp_subj = tempfile.mkstemp(Path(data['name']).suffix)
-    _, temp_ref = tempfile.mkstemp('.m4a')
-    _, temp_out = tempfile.mkstemp('.m4a')
-    try:
+
+def main(data, context):
+    submission = Submission.from_bucket_trigger(data, context)
+
+    # Check required files
+    audio = submission.audio_extracted
+    if not audio.exists():
+        return f"Blob {audio.url} does not exist!"
+
+    reference = F.some(lambda x: x.exists(), submission.audio_reference_candidates())
+    if not reference:
+        urls = [c.url for c in submission.audio_reference_candidates()]
+        return f"Unable to find reference audio! Tried {urls}"
+
+    # Load config
+    audio_cfg = submission.song_config()['audio']
+    loudnorm_cfg = submission.song_config()['loudnorm']
+    corr_cfg = submission.song_config()['correlation']
+
+    with TemporaryDirectory() as tempdir:
+        os.chdir(tempdir)
+        logging.info("In temp dir: %s", tempdir)
+
         # Download files
-        logging.info('Downloading reference %s',
-                     gcs_url(ref_blob.bucket.name, ref_blob.name))
-        ref_blob.download_to_filename(temp_ref)
-        logging.info('Downloading subject %s', url)
-        subj_blob.download_to_filename(temp_subj)
-        # Analyze and align subject
-        logging.info('Aligning audio files %s', url)
-        analysis = align_audio_files(temp_ref, temp_subj, temp_out,
-                                     singer_count(subj_blob.name))
-        # Send analysis to firestore
+        logging.info("Downloading subject %s", audio.url)
+        audio.download(audio.filename)
+        logging.info("Downloading reference %s", reference.url)
+        reference.download(reference.filename)
+
+        # Process
+        analysis, _ = align.cross_correlate(
+            reference.filename,
+            audio.filename,
+            samplerate=corr_cfg.get('samplerate', ANALYSIS_SAMPLERATE),
+            preprocess=corr_cfg.get('preprocess')
+        )
+        if audio_cfg['loudnorm']:
+            analysis['loudnorm'] = loudnorm_analysis(audio.filename,
+                                                     submission.singer_count(),
+                                                     loudnorm_cfg)
+
+        # Update firestore
         logging.info('Saving analysis data to firestore')
-        doc_name = str(Path(data['name']).with_suffix(''))
-        ref = db.collection(SUBMISSIONS_COLLECTION).document(doc_name)
-        ref.set({'analysis': analysis}, merge=True)
-        # Send output to cloud storage
-        logging.info('Saving aligned audio file to %s',
-                     gcs_url(ALIGNED_AUDIO_BUCKET, data['name']))
-        aligned_bucket = storage_client.bucket(ALIGNED_AUDIO_BUCKET)
-        aligned_bucket.blob(data['name']).upload_from_filename(temp_out)
-    finally:
-        os.remove(temp_subj)
-        os.remove(temp_ref)
-        os.remove(temp_out)
+        submission.firestore_document().set({'analysis': analysis}, merge=True)
+
+        # Output
+        out_file = 'tmp_' + audio.filename
+        write_aligned_audio(audio.filename, out_file, analysis, audio_cfg)
+
+        # Upload
+        logging.info("Uploading to %s", submission.audio_aligned.url)
+        submission.audio_aligned.upload(out_file)

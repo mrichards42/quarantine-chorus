@@ -1,4 +1,4 @@
 --memory: 1024MB
 --runtime: python37
 --trigger-bucket: quarantine-chorus-audio-extracted
---env-vars-file: env.yml
+--entry-point: main
