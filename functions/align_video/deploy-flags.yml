@@ -2,3 +2,4 @@
 --timeout: 9m
 --runtime: python37
 --trigger-bucket: quarantine-chorus-audio-aligned
+--entry-point: main

@@ -16,4 +16,4 @@ ffmpeg=$(find . -type f -name ffmpeg)
 echo 'Deploying to gcloud'
 
 gcloud functions deploy "$@" \
-  --env-vars-file <(cat env.yml - <<<"FFMPEG: $ffmpeg")
+  --set-env-vars="FFMPEG=$ffmpeg"
