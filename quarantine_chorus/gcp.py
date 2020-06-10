@@ -1,6 +1,6 @@
 """Lazy wrappers around google cloud clients."""
 
-from .lazy import static_cached_property
+from .decorators import static_cached_property
 
 
 class GCP:

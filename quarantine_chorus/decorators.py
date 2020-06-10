@@ -1,4 +1,4 @@
-"""Lazy utils."""
+"""Misc decorators"""
 
 
 class static_cached_property:

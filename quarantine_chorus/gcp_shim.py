@@ -9,7 +9,7 @@ from pathlib import Path
 
 import funcy as F
 
-from .lazy import static_cached_property
+from .decorators import static_cached_property
 
 
 class GCP:
