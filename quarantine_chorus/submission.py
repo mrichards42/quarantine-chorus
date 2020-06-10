@@ -179,8 +179,8 @@ class Submission:
         ext = self.audio_extension()
         part_str = '_'.join(self.parts())
         return [
-            f'{self.singing}/{self.song}/reference_{part_str}.{ext}',
-            f'{self.singing}/{self.song}/reference.{ext}'
+            f'{self.singing}/{self.song}/lead_{part_str}.{ext}',
+            f'{self.singing}/{self.song}/lead.{ext}'
         ]
 
     # -- google cloud clients --
