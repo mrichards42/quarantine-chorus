@@ -54,6 +54,15 @@ def run_async(
     )
 
 
+_old_run = ffmpeg._run.run
+
+
+@output_operator()
+def run(stream_spec, cmd=None, **kwargs):
+    return _old_run(stream_spec, cmd or EXECUTABLE, **kwargs)
+
+
+ffmpeg._run.run = run
 ffmpeg._run.run_async = run_async
 
 
