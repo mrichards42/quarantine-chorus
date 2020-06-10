@@ -45,7 +45,7 @@ def run_async(
 ):
     cmd = cmd or EXECUTABLE  # added
     args = ffmpeg._run.compile(stream_spec, cmd, overwrite_output=overwrite_output)
-    logging.debug('Running ffmpeg with args: %s', args)  # added
+    logging.info('Running ffmpeg with args: %s', args)  # added
     stdin_stream = subprocess.PIPE if pipe_stdin else None
     stdout_stream = subprocess.PIPE if pipe_stdout or quiet else None
     stderr_stream = subprocess.PIPE if pipe_stderr or quiet else None
