@@ -6,9 +6,10 @@ from tempfile import TemporaryDirectory
 
 import funcy as F
 
+from quarantine_chorus import align
 from quarantine_chorus import ffmpeg
+from quarantine_chorus.decorators import log_return
 from quarantine_chorus.submission import Submission
-import quarantine_chorus.align as align
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -38,6 +39,7 @@ def write_aligned_audio(in_file, out_file, analysis, cfg):
     return audio.output(out_file, ac=1).run(overwrite_output=True)
 
 
+@log_return(level=logging.WARNING)
 def main(data, context):
     submission = Submission.from_bucket_trigger(data, context)
 

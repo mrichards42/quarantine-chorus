@@ -5,6 +5,7 @@ import os
 from tempfile import TemporaryDirectory
 
 from quarantine_chorus import ffmpeg
+from quarantine_chorus.decorators import log_return
 from quarantine_chorus.submission import Submission
 
 logging.basicConfig(level=logging.DEBUG)
@@ -26,6 +27,7 @@ def extract_audio_to_file(in_file, out_file, cfg):
     )
 
 
+@log_return(logging.WARNING)
 def main(data, context):
     submission = Submission.from_bucket_trigger(data, context)
     video = submission.video_upload
