@@ -11,6 +11,8 @@ from quarantine_chorus.submission import Submission
 logging.basicConfig(level=logging.DEBUG)
 
 ffmpeg.EXECUTABLE = os.environ.get('FFMPEG', 'ffmpeg')
+if ffmpeg.EXECUTABLE != 'ffmpeg':
+    ffmpeg.EXECUTABLE = os.path.abspath(ffmpeg.EXECUTABLE)
 
 
 def write_aligned_video(in_file, out_file, analysis, cfg):
