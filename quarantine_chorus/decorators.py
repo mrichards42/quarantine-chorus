@@ -1,5 +1,17 @@
 """Misc decorators"""
 
+import funcy as F
+
+
+@F.decorator
+def log_return(call, level):
+    """A decorator that logs non-None return values."""
+    import logging
+    result = call()
+    if result is not None:
+        logging.log(level, "%s", result)
+    return result
+
 
 class static_cached_property:
     """A static cached property decorator.
