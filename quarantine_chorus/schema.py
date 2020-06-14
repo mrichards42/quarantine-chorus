@@ -5,6 +5,8 @@ import uuid
 import funcy as F
 from marshmallow import Schema, fields, validate, pre_load, post_load
 
+from . import config
+
 CONTENT_TYPE_RE = "video/.*|audio/.*"
 
 AUDIO_EXTENSIONS = (
@@ -36,6 +38,7 @@ FILENAME_RE = '.*[.](' + '|'.join(AUDIO_EXTENSIONS + VIDEO_EXTENSIONS) + ')'
 MB = 1024 * 1024
 FILE_SIZE = 1024 * MB
 PARTS = ('bass', 'alto', 'tenor', 'treble')
+SONG_RE = '[A-Za-z]{,3}\d{1,3}[tb]?'
 
 
 def sanitize_filename(filename):
@@ -87,8 +90,8 @@ class LocationSchema(Schema):
 
 class SubmissionSchema(Schema):
     # required fields
-    singing = fields.Str(required=True)
-    song = fields.Str(required=True)
+    singing = fields.Str(required=True, validate=validate.Length(min=1))
+    song = fields.Str(required=True, validate=validate.Regexp(SONG_RE))
     singers = fields.List(fields.Nested(SingerSchema), required=True,
                           validate=validate.Length(min=1))
     # optional fields
