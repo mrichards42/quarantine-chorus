@@ -97,6 +97,11 @@ class LocalBlob:
     def exists(self):
         return self.path.exists()
 
+    def create_resumable_upload_session(self, *args, **kwargs):
+        # We aren't going to implement a full resumable upload interface anywhere for
+        # the local filesystem, so just return the blob's location as a uri
+        return self.path.as_uri()
+
 
 class LocalBucket:
     def __init__(self, path):

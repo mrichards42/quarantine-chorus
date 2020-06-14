@@ -64,6 +64,13 @@ class _GCS:
         else:
             return self._blob.upload_from_file(file_or_filename, **kwargs)
 
+    def create_resumable_upload_session(self, content_type, size, origin=None):
+        """Creates and returns a resumable upload url.
+
+        See: https://cloud.google.com/storage/docs/resumable-uploads
+        """
+        return self._blob.create_resumable_upload_session(content_type, size, origin)
+
 
 class Submission:
     """A video/audio submission.
