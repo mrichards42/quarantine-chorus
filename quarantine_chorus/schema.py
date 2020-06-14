@@ -1,4 +1,8 @@
 import datetime
+import re
+import uuid
+
+import funcy as F
 from marshmallow import Schema, fields, validate, pre_load, post_load
 
 CONTENT_TYPE_RE = "video/.*|audio/.*"
@@ -32,6 +36,27 @@ FILENAME_RE = '.*[.](' + '|'.join(AUDIO_EXTENSIONS + VIDEO_EXTENSIONS) + ')'
 MB = 1024 * 1024
 FILE_SIZE = 1024 * MB
 PARTS = ('bass', 'alto', 'tenor', 'treble')
+
+
+def sanitize_filename(filename):
+    return re.sub(r'[^a-zA-Z0-9_.]', '', filename)
+
+
+def object_name(submission, extension):
+    name_parts = F.flatten((
+        # Parts
+        submission['parts'],
+        # Names
+        ['.'.join(s.get('name', '').split()) for s in submission['singers']],
+        # Location
+        F.keep(submission.get('location', {}).get, ('city', 'state', 'country'))
+    ))
+    return '/'.join(F.map(sanitize_filename, (
+        submission['singing'],
+        submission['song'],
+        # attach a uuid to the file name so that we never clobber uploads
+        '_'.join(filter(None, name_parts)) + '.' + str(uuid.uuid4()) + extension
+    )))
 
 
 class RealDateTime(fields.DateTime):
@@ -75,10 +100,14 @@ class SubmissionSchema(Schema):
     created = RealDateTime()
 
     @post_load
-    def normalize_data(self, in_data, **kwargs):
-        in_data['singing'] = in_data['singing'].lower()
-        in_data['song'] = in_data['song'].lower()
-        return in_data
+    def normalize_data(self, data, **kwargs):
+        # Normalize strings
+        data['singing'] = data['singing'].lower()
+        data['song'] = data['song'].lower()
+        # Compute parts
+        if not data.get('parts'):
+            data['parts'] = sorted(set(s.get('part') for s in data['singers']))
+        return data
 
 
 class UploadRequest(Schema):
@@ -86,3 +115,14 @@ class UploadRequest(Schema):
     filename = fields.Str(required=True)
     content_type = fields.Str(required=True, validate=validate.Regexp(CONTENT_TYPE_RE))
     content_length = fields.Int(required=True, validate=validate.Range(0, FILE_SIZE))
+
+    @post_load
+    def normalize_data(self, data, **kwargs):
+        # Compute an object url
+        submission = data['submission']
+        if not submission.get('object_url'):
+            m = re.search(r'[.][^/.]+$', data['filename'])
+            extension = m.group() if m else ''
+            name = object_name(submission, extension)
+            submission['object_url'] = f'gs://{config.UPLOAD_BUCKET}/{name}'
+        return data
