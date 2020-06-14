@@ -2,4 +2,4 @@
 --runtime: python37
 --trigger-http:
 --allow-unauthenticated:
---env-vars-file: env.yml
+--entry-point: main

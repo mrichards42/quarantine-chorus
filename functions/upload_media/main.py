@@ -1,22 +1,40 @@
 import logging
-import os
-from pathlib import Path
+
 import flask
+import marshmallow
 
-from google.cloud import firestore
-from google.cloud import storage
+from quarantine_chorus import schema
+from quarantine_chorus.submission import Submission
 
-import impl
+logging.basicConfig(level=logging.DEBUG)
 
-storage_client = storage.Client()
-db = firestore.Client()
 
-UPLOAD_BUCKET = os.environ['UPLOAD_BUCKET']
-SUBMISSIONS_COLLECTION = os.environ['SUBMISSIONS_COLLECTION']
+def json_error(data, status_code):
+    return flask.Response(
+        response=flask.json.dumps(data),
+        status=status_code,
+        mimetype='application/json'
+    )
 
-logging.basicConfig(level=logging.INFO)
 
-def upload_media(request):
+def log_error_response(request, response):
+    logging.warning("Bad request with data: %r; returning error response: %s %r",
+                    request.data or request.args,
+                    response.status,
+                    response.data)
+
+
+def parse_request(request):
+    if request.method != 'POST':
+        return json_error({"error": f"{request.method} not allowed"}, 405)
+    try:
+        data = request.get_json(silent=True) or request.args
+        return schema.UploadRequest().load(data)
+    except marshmallow.exceptions.ValidationError as e:
+        return json_error({"error": "Bad request", "messages": e.messages}, 400)
+
+
+def main(request):
     """Initiates a media upload.
 
     Request should include:
@@ -36,27 +54,21 @@ def upload_media(request):
 
     Returns a url that can be used to start a resumable cloud storage upload.
     """
-    # Parse the request
-    data = impl.parse_upload_request(request)
-    submission = data['submission']
+    # Parse the request into a Submission object
+    data = parse_request(request)
+    if isinstance(data, flask.Response):
+        log_error_response(request, data)
+        return data
 
-    # Build the storage object url
-    extension = Path(data['filename']).suffix # TODO: allow selection by mimetype?
-    object_name = impl.object_name(submission, extension)
-    object_url = f'gs://{UPLOAD_BUCKET}/{object_name}'
+    submission = Submission.from_gcs_url(data['submission']['object_url'])
 
     # Create the firestore document
     logging.info('Creating firestore document')
-    doc = impl.firestore_document(submission, object_url)
-    ref = db.collection(SUBMISSIONS_COLLECTION).document(object_name)
-    ref.set(doc)
+    submission.firestore_document().set(data['submission'])
 
     # Create and return a resumable upload URL for the bucket
-    logging.info('Creating upload request for %s', object_url)
-    bucket = storage_client.bucket(UPLOAD_BUCKET)
-    blob = bucket.blob(object_name)
-
-    url = blob.create_resumable_upload_session(
+    logging.info('Creating upload request for %s', submission.video_upload.url)
+    url = submission.video_upload.create_resumable_upload_session(
         content_type=data['content_type'],
         size=data['content_length'],
         origin=request.headers.get('origin')
