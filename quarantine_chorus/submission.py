@@ -244,7 +244,7 @@ class Submission:
 
     def singers(self):
         """Gets a list of singers from firestore."""
-        return self.get_firestore_data('singers', [])
+        return self.get_firestore_data('singers') or []
 
     def singer_count(self):
         """Returns the number of singers.
