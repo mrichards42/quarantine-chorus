@@ -43,6 +43,10 @@ def write_aligned_audio(in_file, out_file, analysis, cfg):
 def main(data, context):
     submission = Submission.from_bucket_trigger(data, context)
 
+    # Make sure this isn't one of the lead files
+    if submission.filename.startswith('lead'):
+        return f"Ignoring lead audio file: gcs://{data['bucket']}{data['name']}"
+
     # Check required files
     audio = submission.audio_extracted
     if not audio.exists():
