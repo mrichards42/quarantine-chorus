@@ -139,6 +139,10 @@ class Submission:
         """Returns the song config dict for this submission."""
         return config.song(self.singing, self.song)
 
+    def upload_config(self):
+        """Returns the upload config dict for this submission."""
+        return self.song_config()['upload']
+
     def audio_config(self):
         """Returns the audio config dict for this submission."""
         return self.song_config()['audio']

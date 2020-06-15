@@ -34,6 +34,16 @@ def parse_request(request):
         return json_error({"error": "Bad request", "messages": e.messages}, 400)
 
 
+def validate_submission(submission, data):
+    cfg = submission.upload_config()
+    max_content_length = 1024 * 1024 * cfg['file_size_mb']
+    if data['content_length'] > max_content_length:
+        return json_error({
+            "error": ("Request too large: "
+                      f"content_length must be less than {max_content_length} bytes")
+        }, 413)
+
+
 def main(request):
     """Initiates a media upload.
 
@@ -61,6 +71,10 @@ def main(request):
         return data
 
     submission = Submission.from_gcs_url(data['submission']['object_url'])
+    error = validate_submission(submission, data)
+    if error:
+        log_error_response(request, error)
+        return error
 
     # Create the firestore document
     logging.info('Creating firestore document')

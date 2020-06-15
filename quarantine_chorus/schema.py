@@ -35,8 +35,6 @@ VIDEO_EXTENSIONS = (
     'webm',
 )
 FILENAME_RE = '.*[.](' + '|'.join(AUDIO_EXTENSIONS + VIDEO_EXTENSIONS) + ')'
-MB = 1024 * 1024
-FILE_SIZE = 1024 * MB
 PARTS = ('bass', 'alto', 'tenor', 'treble')
 SONG_RE = '[A-Za-z]{,3}\d{1,3}[tb]?'
 
@@ -118,7 +116,7 @@ class UploadRequest(Schema):
     submission = fields.Nested(SubmissionSchema, required=True)
     filename = fields.Str(required=True)
     content_type = fields.Str(required=True, validate=validate.Regexp(CONTENT_TYPE_RE))
-    content_length = fields.Int(required=True, validate=validate.Range(0, FILE_SIZE))
+    content_length = fields.Int(required=True)
 
     @post_load
     def normalize_data(self, data, **kwargs):
