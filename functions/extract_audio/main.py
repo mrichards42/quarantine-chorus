@@ -51,10 +51,8 @@ def main(data, context):
         logging.info("Extracting audio to %s", audio.filename)
         extract_audio_to_file(video.filename, audio.filename, audio_cfg)
 
-        # Upload
-        logging.info("Uploading to %s", submission.audio_extracted.url)
-        audio.upload(audio.filename)
-
+        # Upload reference audio files first (so they're available for align_audio
+        # before the main file is uploaded).
         if submission.is_reference():
             logging.info("Reference submission: creating reference files.")
             for reference in submission.audio_reference_candidates():
@@ -64,3 +62,6 @@ def main(data, context):
                 # we'd have to reimplement the copy function.
                 logging.info("Uploading to %s", reference.url)
                 reference.upload(audio.filename)
+
+        logging.info("Uploading to %s", submission.audio_extracted.url)
+        audio.upload(audio.filename)
