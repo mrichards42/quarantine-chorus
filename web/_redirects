@@ -11,14 +11,6 @@
 
 ## In progress songs
 
-# 31t
-/providence/31t/submit      /submission.html  200
-/providence/31t/lead-video  https://www.youtube-nocookie.com/embed/IxV-43cb5Gs?modestbranding=1&rel=0
-
-# 70t
-/providence/70t/submit      /submission.html  200
-/providence/70t/lead-video  https://www.youtube-nocookie.com/embed/uA6OhAgW-IU?modestbranding=1&rel=0
-
 ## Complete songs
 
 # 37b
@@ -36,3 +28,11 @@
 # CH131
 /CH/131/mix-video  https://www.youtube-nocookie.com/embed/evwwmWrJhUI?modestbranding=1&rel=0
 /CH/131/*          /mix.html  200
+
+# 31t
+/providence/31t/mix-video  https://www.youtube-nocookie.com/embed/RZwH5epPCLk?modestbranding=1&rel=0
+/providence/31t/*          /mix.html  200
+
+# 70t
+/providence/70t/mix-video  https://www.youtube-nocookie.com/embed/hk1fjriKPsI?modestbranding=1&rel=0
+/providence/70t/*          /mix.html  200
