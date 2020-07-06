@@ -92,7 +92,8 @@ def amix(*streams, **kwargs):
 
     `streams` is either a list of audio streams, or any number of varargs streams.
     """
-    return ffmpeg.filter(F.lflatten(streams), 'amix', inputs=len(streams), **kwargs)
+    streams = F.lflatten(streams)
+    return ffmpeg.filter(streams, 'amix', inputs=len(streams), **kwargs)
 
 
 def volume(stream, volume=None, *, dB=None, **kwargs):
