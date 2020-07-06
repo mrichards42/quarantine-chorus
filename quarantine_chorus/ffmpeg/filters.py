@@ -75,15 +75,16 @@ def xstack(*streams, layout, **kwargs):
 
     assert(len(streams) == len(layout))
 
-    for i, l in layout:
+    layout_strs = []
+    for i, l in enumerate(layout):
         if isinstance(l, (list, tuple)):
-            layout[i] = f'{l[0]}_{l[1]}'
+            layout_strs.append(f'{l[0]}_{l[1]}')
         else:
-            layout[i] = str(l)
+            layout_strs.append(str(l))
 
     return ffmpeg.filter(streams, 'xstack',
                          inputs=len(streams),
-                         layout='|'.join(layout),
+                         layout='|'.join(layout_strs),
                          **kwargs)
 
 
