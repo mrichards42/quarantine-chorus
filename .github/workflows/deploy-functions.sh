@@ -6,7 +6,7 @@ set -euo pipefail
 # Deploy if contents have changed since the last deploy
 
 # Each function should have a `deploy-flags.yml` file with deploy
-# confuguration, using the format described at:
+# configuration, using the format described at:
 # https://cloud.google.com/sdk/gcloud/reference/topic/flags-file
 
 MD5_LABEL_KEY='content-hash-md5'
