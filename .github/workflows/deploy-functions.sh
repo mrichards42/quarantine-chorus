@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 # Look for all functions in functions/*
 # Create a hash of their contents
 # Deploy if contents have changed since the last deploy
@@ -24,7 +26,7 @@ for d in functions/*; do
   # This isn't completely foolproof, but it's pretty good (fails for files with
   # newlines in the name). The initial attempt used tar, but it included too
   # much metadata (including last modified time), which didn't work right in CI
-  local_md5=$(gcloud meta list-files-for-upload \
+  local_md5=$("$DIR/find_upload_files.py" \
                 | sort \
                 | xargs -I {} /bin/sh -c 'echo "$0"; cat "$0"' {} \
                 | md5sum \
