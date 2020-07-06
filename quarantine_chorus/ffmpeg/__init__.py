@@ -24,8 +24,6 @@ from .crop import crop
 # ffprobe helpers
 from .probe import video_info, audio_info  # noqa F401
 
-# Wav reading
-from .wav import read_wav  # noqa F401
 
 
 # == Patch run_async with logging and allow changing default ffmpeg ==

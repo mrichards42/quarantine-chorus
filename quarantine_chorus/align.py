@@ -11,8 +11,8 @@ def _array_or_read_wav(array_or_filename, samplerate):
         return array_or_filename
     elif isinstance(array_or_filename, str):
         logging.info("Extracting pcm data from %s", array_or_filename)
-        from .ffmpeg import wav
-        return wav.read_wav(array_or_filename, samplerate)
+        from .wav import read_wav
+        return read_wav(array_or_filename, samplerate)
     else:
         raise ValueError("Expected a numpy array or a file name but got "
                          + type(array_or_filename))
