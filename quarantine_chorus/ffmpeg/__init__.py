@@ -22,7 +22,7 @@ from .crop import run_cropdetect  # noqa F401
 from .crop import crop
 
 # ffprobe helpers
-from .probe import video_info, audio_info  # noqa F401
+from ._probe import probe, video_info, audio_info  # noqa F401
 
 
 
