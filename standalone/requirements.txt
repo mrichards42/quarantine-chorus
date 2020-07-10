@@ -1,0 +1,7 @@
+PyInstaller==3.6
+wxPython==4.1.0
+
+-r quarantine_chorus/align_requirements.txt
+-r quarantine_chorus/ffmpeg_requirements.txt
+-r quarantine_chorus/layout_requirements.txt
+-r quarantine_chorus/mlt_requirements.txt
