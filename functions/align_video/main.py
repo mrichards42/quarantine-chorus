@@ -19,7 +19,7 @@ def write_aligned_video(in_file, out_file, analysis, cfg):
     stream = ffmpeg.input(in_file)
 
     # Video filters
-    if ffmpeg.video_info(in_file):
+    if ffmpeg.probe(in_file).video:
         video = stream.video
         # Detect crop at 20 seconds into the video
         crop = ffmpeg.run_cropdetect(in_file, ss=20)
