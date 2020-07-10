@@ -26,12 +26,23 @@ from . import _probe
 from ._probe import probe  # noqa F401
 
 # ffplay helpers
+from . import _play
 from ._play import play, play_async  # noqa F401
 
 
 # == Patch run_async with logging and allow changing default ffmpeg ==
 
 EXECUTABLE = 'ffmpeg'
+
+
+def set_executables(ffmpeg=None, ffprobe=None, ffplay=None):
+    if ffmpeg is not None:
+        global EXECUTABLE
+        EXECUTABLE = ffmpeg
+    if ffprobe is not None:
+        _probe.EXECUTABLE = ffprobe
+    if ffplay is not None:
+        _play.EXECUTABLE = ffplay
 
 
 @output_operator()
