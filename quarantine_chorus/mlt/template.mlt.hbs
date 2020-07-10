@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mlt>
+<profile description="automatic"
+  width="{{width}}" height="{{height}}"
+  progressive="1"
+  sample_aspect_num="1" sample_aspect_den="1"
+  frame_rate_num="{{frame_rate}}" frame_rate_den="1"/>
+
+  {{!-- "main_bin" playlist required for shotcut --}}
+  <playlist id="main_bin">
+    <property name="xml_retain">1</property>
+  </playlist>
+
+  {{!-- background required for shotcut --}}
+  <producer id="black" in="00:00:00.000" out="{{fmt_duration total_duration}}">
+    <property name="length">{{fmt_duration total_duration}}</property>
+    <property name="eof">pause</property>
+    <property name="resource">0</property>
+    <property name="aspect_ratio">1</property>
+    <property name="mlt_service">color</property>
+    <property name="mlt_image_format">rgb24a</property>
+    <property name="set.test_audio">0</property>
+  </producer>
+  <playlist id="background">
+    <entry producer="black" in="00:00:00.000" out="{{fmt_duration total_duration}}"/>
+  </playlist>
+
+  {{!-- each file gets a producer and a playlist --}}
+  {{#each tracks}}
+    {{#if blank_track}}
+      <playlist id="playlist{{@index}}">
+        <property name="shotcut:video">1</property>
+        <property name="shotcut:name">V{{inc @index}}</property>
+      </playlist>
+    {{else}}
+      <producer id="producer{{@index}}" in="00:00:00.000" out="{{fmt_duration duration}}">
+        <property name="length">{{fmt_duration duration}}</property>
+        <property name="eof">pause</property>
+        <property name="resource">{{filename}}</property>
+        {{#if has_audio}}
+          <property name="audio_index">{{audio_index}}</property>
+        {{/if}}
+        {{#if has_video}}
+          <property name="video_index">{{video_index}}</property>
+        {{/if}}
+        <property name="mute_on_pause">0</property>
+        <property name="mlt_service">avformat-novalidate</property>
+        <property name="seekable">1</property>
+        <property name="aspect_ratio">1</property>
+        <property name="ignore_points">0</property>
+        <property name="shotcut:caption">{{name}}</property>
+        <property name="shotcut:skipConvert">1</property>
+        <property name="shotcut:projectFolder">1</property>
+        <property name="global_feed">1</property>
+        {{!-- videos get a position filter --}}
+        {{#if has_video}}
+          <filter>
+            <property name="background">colour:0</property>
+            <property name="mlt_service">affine</property>
+            <property name="shotcut:filter">affineSizePosition</property>
+            <property name="transition.fill">1</property>
+            <property name="transition.distort">0</property>
+            <property name="transition.rect">{{left}} {{top}} {{width}} {{height}} 1</property>
+            <property name="transition.valign">top</property>
+            <property name="transition.halign">left</property>
+            <property name="transition.threads">0</property>
+          </filter>
+        {{/if}}
+        {{!-- loudness normalization filter --}}
+        {{#if loudness_analysis}}
+          <filter>
+            <property name="program">{{loudness_analysis.program}}</property>
+            <property name="mlt_service">loudness</property>
+            <property name="results">{{loudness_analysis.results}}</property>
+            <property name="disable">0</property>
+            <property name="reload">1</property>
+          </filter>
+        {{/if}}
+        {{!-- maybe a volume filter? --}}
+        {{#if volume}}
+          <filter>
+            <property name="window">75</property>
+            <property name="max_gain">20dB</property>
+            <property name="level">{{volume}}</property>
+            <property name="mlt_service">volume</property>
+          </filter>
+        {{/if}}
+      </producer>
+
+      <playlist id="playlist{{@index}}">
+      {{#if has_video}}
+        <property name="shotcut:video">1</property>
+        <property name="shotcut:name">V{{inc @index}}</property>
+      {{else}}
+        <property name="shotcut:audio">1</property>
+        <property name="shotcut:name">A{{inc @index}}</property>
+      {{/if}}
+      {{#if alignment_analysis.pad_seconds}}
+        <blank length="{{fmt_duration alignment_analysis.pad_seconds}}"/>
+      {{/if}}
+        <entry producer="producer{{@index}}" in="{{fmt_duration alignment_analysis.trim_seconds}}" out="{{fmt_duration duration}}"/>
+      </playlist>
+
+
+    {{/if}} {{! not blank_track}}
+  {{/each}}
+
+  <!-- the mix -->
+  <tractor id="tractor0" in="00:00:00.000" out="{{fmt_duration total_duration}}">
+    <property name="shotcut">1</property>
+    <track producer="background"/>
+    {{#each tracks}}
+      <track producer="playlist{{@index}}"/>
+    {{/each}}
+    {{#each tracks}}
+      <transition>
+        <property name="a_track">0</property>
+        <property name="b_track">{{inc @index}}</property>
+        <property name="mlt_service">mix</property>
+        <property name="always_active">1</property>
+        <property name="sum">1</property>
+      </transition>
+      <transition>
+        <property name="a_track">{{#if @first}}0{{else}}1{{/if}}</property>
+        <property name="b_track">{{inc @index}}</property>
+        <property name="version">0.9</property>
+        <property name="mlt_service">frei0r.cairoblend</property>
+        <property name="disable">{{#if @first}}1{{else}}0{{/if}}</property>
+      </transition>
+    {{/each}}
+  </tractor>
+</mlt>
