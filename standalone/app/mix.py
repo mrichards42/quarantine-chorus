@@ -1,3 +1,5 @@
+import logging
+import shlex
 import subprocess
 
 from quarantine_chorus import ffmpeg
@@ -48,10 +50,19 @@ def ffmpeg_mix(tracks, width=None, height=None):
     return streams
 
 
+def _shjoin(args):
+    return ' '.join(shlex.quote(arg) for arg in args)
+
+
 def preview_thread(tracks, **kwargs):
     streams = ffmpeg_mix(tracks, **kwargs)
-    ffmpeg_proc = (ffmpeg.output(*streams, 'pipe:', format='mpegts')
-                   .run_async(pipe_stdout=True))
-    subprocess.run(['ffplay', '-i', 'pipe:'], stdin=ffmpeg_proc.stdout)
-    # No need to keep the ffmpeg process around after ffplay has stopped
-    ffmpeg_proc.terminate()
+    # At least on mac, running ffplay using subprocess works when we're started from
+    # the command line, but not when running the bundled app. Running ffmpeg works fine
+    # either way, the ffplay window never pops up.
+    # Instead, build a pipeline and run using the shell, which seems to work
+    ffmpeg_cmd = (ffmpeg.output(*streams, 'pipe:', format='mpegts')
+                  .compile(ffmpeg.EXECUTABLE))
+    ffplay_cmd = [ffmpeg._play.EXECUTABLE, '-i', 'pipe:']
+    cmd = _shjoin(ffmpeg_cmd) + ' | ' + _shjoin(ffplay_cmd)
+    logging.info("Running preview command: %s", cmd)
+    subprocess.Popen(cmd, shell=True)
