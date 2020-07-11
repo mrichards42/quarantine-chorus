@@ -44,7 +44,14 @@ def ffmpeg_mix(tracks, width=None, height=None, audio_only=False):
     # Combine outputs and return all the streams
     streams = []
     if audio_streams:
-        streams.append(ffmpeg.amix(audio_streams))
+        streams.append(ffmpeg.amix(audio_streams, dropout_transition=1000)
+                       # amix reduces volume of each track to `1/n`, so increase the
+                       # result by a factor of `n` to get it back to normal. Hopefully
+                       # we've already applied some volume normalization, so this
+                       # shouldn't be too loud. AFAICT Shotcut doesn't do any kind of
+                       # volume reduction when it mixes tracks, so this should be
+                       # closer to what it will sound like in Shotcut anyways.
+                       .volume(len(audio_streams)))
     if video_streams:
         streams.append(ffmpeg.xstack(video_streams, layout=xstack_layout))
     return streams
