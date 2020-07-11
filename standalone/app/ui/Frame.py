@@ -50,9 +50,13 @@ class Frame(base.Frame):
                                     audio_only=True)
 
     def OnPreviewVideo(self, evt):
+        h = TrackList.background_size()['height']
+        max_height = 480
+        scale = min(1, max_height / (h or max_height))
         wx.GetApp().RunInBackground(mix.preview_thread,
                                     TrackList.all_tracks(),
-                                    **TrackList.background_size())
+                                    **TrackList.background_size(),
+                                    scale=scale)
 
     def OnViewLogs(self, evt):
         wx.GetApp().ShowLogs()

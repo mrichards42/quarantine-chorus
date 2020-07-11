@@ -5,7 +5,7 @@ import subprocess
 from quarantine_chorus import ffmpeg
 
 
-def ffmpeg_mix(tracks, width=None, height=None, audio_only=False):
+def ffmpeg_mix(tracks, width=None, height=None, audio_only=False, scale=1):
     """Mixes all tracks, returning a list of output streams."""
     audio_streams = []
     video_streams = []
@@ -29,14 +29,14 @@ def ffmpeg_mix(tracks, width=None, height=None, audio_only=False):
             video = stream.video
             if t.get('alignment_analysis'):
                 video = video.align_video(t['alignment_analysis'])
-            video = video.scale(w=t['width'], h=t['height'])
+            video = video.scale(w=int(t['width'] * scale), h=int(t['height'] * scale))
             video_streams.append(video)
-            xstack_layout.append((t['left'], t['top']))
+            xstack_layout.append((int(t['left'] * scale), int(t['top'] * scale)))
     # background for xstack
     if video_streams:
         video_tracks = [t for t in tracks if t.get('has_video')]
-        w = width or int(max(t['left'] + t['width'] for t in video_tracks))
-        h = height or int(max(t['top'] + t['height'] for t in video_tracks))
+        w = int((width or max(t['left'] + t['width'] for t in video_tracks)) * scale)
+        h = int((height or max(t['top'] + t['height'] for t in video_tracks)) * scale)
         background = ffmpeg.input(f'color=black:size={w}x{h}:duration=1:rate=30',
                                   format='lavfi')
         video_streams.insert(0, background)
