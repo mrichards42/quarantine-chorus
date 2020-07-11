@@ -1,4 +1,5 @@
-PyInstaller==3.6
+# Pyinstaller 3.6 has some issues that are fixed in the develop branch
+https://github.com/pyinstaller/pyinstaller/archive/0c75d32bdb53508df4feedb477b7fa2e880420cf.zip
 wxPython==4.1.0
 
 -r quarantine_chorus/align_requirements.txt
