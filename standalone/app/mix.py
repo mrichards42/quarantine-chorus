@@ -5,7 +5,7 @@ import subprocess
 from quarantine_chorus import ffmpeg
 
 
-def ffmpeg_mix(tracks, width=None, height=None):
+def ffmpeg_mix(tracks, width=None, height=None, audio_only=False):
     """Mixes all tracks, returning a list of output streams."""
     audio_streams = []
     video_streams = []
@@ -25,7 +25,7 @@ def ffmpeg_mix(tracks, width=None, height=None):
                 delta_db = target_db - in_loudness
                 audio = audio.volume(dB=delta_db)
             audio_streams.append(audio)
-        if t.get('has_video'):
+        if t.get('has_video') and not audio_only:
             video = stream.video
             if t.get('alignment_analysis'):
                 video = video.align_video(t['alignment_analysis'])

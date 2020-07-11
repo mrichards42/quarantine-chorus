@@ -31,8 +31,11 @@ class Frame ( wx.Frame ):
         self.m_openBtn = wx.Button( self, wx.ID_ANY, u"Open", wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer41.Add( self.m_openBtn, 0, wx.ALL, 5 )
 
-        self.m_previewBtn = wx.Button( self, wx.ID_ANY, u"Preview", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer41.Add( self.m_previewBtn, 0, wx.ALL, 5 )
+        self.m_previewAudioBtn = wx.Button( self, wx.ID_ANY, u"Preview Audio", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer41.Add( self.m_previewAudioBtn, 0, wx.ALL, 5 )
+
+        self.m_previewVideoBtn = wx.Button( self, wx.ID_ANY, u"Preview Video", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer41.Add( self.m_previewVideoBtn, 0, wx.ALL, 5 )
 
         self.m_exportBtn = wx.Button( self, wx.ID_ANY, u"Export to Shotcut", wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer41.Add( self.m_exportBtn, 0, wx.ALL, 5 )
@@ -64,7 +67,8 @@ class Frame ( wx.Frame ):
         # Connect Events
         self.Bind( wx.EVT_CLOSE, self.OnClose )
         self.m_openBtn.Bind( wx.EVT_BUTTON, self.OnFileOpen )
-        self.m_previewBtn.Bind( wx.EVT_BUTTON, self.OnPreview )
+        self.m_previewAudioBtn.Bind( wx.EVT_BUTTON, self.OnPreviewAudio )
+        self.m_previewVideoBtn.Bind( wx.EVT_BUTTON, self.OnPreviewVideo )
         self.m_exportBtn.Bind( wx.EVT_BUTTON, self.OnExportShotcut )
         self.Bind( wx.EVT_MENU, self.OnFileOpen, id = self.m_fileOpenItem.GetId() )
         self.Bind( wx.EVT_MENU, self.OnExportShotcut, id = self.m_fileExportItem.GetId() )
@@ -81,7 +85,10 @@ class Frame ( wx.Frame ):
     def OnFileOpen( self, event ):
         event.Skip()
 
-    def OnPreview( self, event ):
+    def OnPreviewAudio( self, event ):
+        event.Skip()
+
+    def OnPreviewVideo( self, event ):
         event.Skip()
 
     def OnExportShotcut( self, event ):

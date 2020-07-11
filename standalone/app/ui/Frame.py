@@ -43,7 +43,13 @@ class Frame(base.Frame):
             with open(file, 'w') as f:
                 f.write(mlt.xml.write_file(tracks, **TrackList.background_size()))
 
-    def OnPreview(self, evt):
+    def OnPreviewAudio(self, evt):
+        wx.GetApp().RunInBackground(mix.preview_thread,
+                                    TrackList.all_tracks(),
+                                    **TrackList.background_size(),
+                                    audio_only=True)
+
+    def OnPreviewVideo(self, evt):
         wx.GetApp().RunInBackground(mix.preview_thread,
                                     TrackList.all_tracks(),
                                     **TrackList.background_size())
