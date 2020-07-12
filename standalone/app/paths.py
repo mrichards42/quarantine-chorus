@@ -9,7 +9,7 @@ from pathlib import Path
 def find_file(d, *names):
     for name in names:
         try:
-            return str(next(Path(d).glob('**/' + name)))
+            return str(next(p for p in Path(d).glob('**/' + name) if p.is_file()))
         except StopIteration:
             continue
 
