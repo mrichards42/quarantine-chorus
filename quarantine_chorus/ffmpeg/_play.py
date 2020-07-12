@@ -12,6 +12,7 @@ EXECUTABLE = 'ffplay'
 def play_async(
         filename,
         cmd=None,
+        stdin=None,
         pipe_stdin=False,
         pipe_stdout=False,
         pipe_stderr=False,
@@ -23,7 +24,7 @@ def play_async(
         args.append(f'-{k}')
         if v is not None:
             args.append(str(v))
-    stdin_stream = subprocess.PIPE if pipe_stdin else None
+    stdin_stream = stdin or (subprocess.PIPE if pipe_stdin else None)
     stdout_stream = subprocess.PIPE if pipe_stdout or quiet else None
     stderr_stream = subprocess.PIPE if pipe_stderr or quiet else None
     logging.info('Running ffplay with args: %s', args)
