@@ -1,5 +1,6 @@
 """ffplay helpers."""
 
+import logging
 import subprocess
 
 import ffmpeg
@@ -25,6 +26,7 @@ def play_async(
     stdin_stream = subprocess.PIPE if pipe_stdin else None
     stdout_stream = subprocess.PIPE if pipe_stdout or quiet else None
     stderr_stream = subprocess.PIPE if pipe_stderr or quiet else None
+    logging.info('Running ffplay with args: %s', args)
     return subprocess.Popen(
         args, stdin=stdin_stream, stdout=stdout_stream, stderr=stderr_stream
     )
