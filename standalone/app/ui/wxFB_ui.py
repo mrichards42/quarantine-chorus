@@ -21,30 +21,39 @@ class Frame ( wx.Frame ):
 
         self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
+        bSizer6 = wx.BoxSizer( wx.VERTICAL )
+
+        self.m_panel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.m_sizer = wx.BoxSizer( wx.VERTICAL )
 
-        bSizer41 = wx.BoxSizer( wx.HORIZONTAL )
+        bSizer7 = wx.BoxSizer( wx.HORIZONTAL )
 
 
-        bSizer41.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+        bSizer7.Add( ( 0, 0), 1, wx.EXPAND, 5 )
 
-        self.m_openBtn = wx.Button( self, wx.ID_ANY, u"Open", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer41.Add( self.m_openBtn, 0, wx.ALL, 5 )
+        self.m_openBtn = wx.Button( self.m_panel, wx.ID_ANY, u"Open", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer7.Add( self.m_openBtn, 0, wx.ALL, 5 )
 
-        self.m_previewAudioBtn = wx.Button( self, wx.ID_ANY, u"Preview Audio", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer41.Add( self.m_previewAudioBtn, 0, wx.ALL, 5 )
+        self.m_previewAudioBtn = wx.Button( self.m_panel, wx.ID_ANY, u"Preview Audio", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer7.Add( self.m_previewAudioBtn, 0, wx.ALL, 5 )
 
-        self.m_previewVideoBtn = wx.Button( self, wx.ID_ANY, u"Preview Video", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer41.Add( self.m_previewVideoBtn, 0, wx.ALL, 5 )
+        self.m_previewVideoBtn = wx.Button( self.m_panel, wx.ID_ANY, u"Preview Video", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer7.Add( self.m_previewVideoBtn, 0, wx.ALL, 5 )
 
-        self.m_exportBtn = wx.Button( self, wx.ID_ANY, u"Export to Shotcut", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer41.Add( self.m_exportBtn, 0, wx.ALL, 5 )
-
-
-        self.m_sizer.Add( bSizer41, 0, wx.EXPAND, 5 )
+        self.m_exportBtn = wx.Button( self.m_panel, wx.ID_ANY, u"Export to Shotcut", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer7.Add( self.m_exportBtn, 0, wx.ALL, 5 )
 
 
-        self.SetSizer( self.m_sizer )
+        self.m_sizer.Add( bSizer7, 0, wx.EXPAND, 5 )
+
+
+        self.m_panel.SetSizer( self.m_sizer )
+        self.m_panel.Layout()
+        self.m_sizer.Fit( self.m_panel )
+        bSizer6.Add( self.m_panel, 1, wx.EXPAND, 5 )
+
+
+        self.SetSizer( bSizer6 )
         self.Layout()
         self.m_menubar1 = wx.MenuBar( 0 )
         self.m_fileMenu = wx.Menu()
@@ -65,7 +74,6 @@ class Frame ( wx.Frame ):
         self.Centre( wx.BOTH )
 
         # Connect Events
-        self.Bind( wx.EVT_CLOSE, self.OnClose )
         self.m_openBtn.Bind( wx.EVT_BUTTON, self.OnFileOpen )
         self.m_previewAudioBtn.Bind( wx.EVT_BUTTON, self.OnPreviewAudio )
         self.m_previewVideoBtn.Bind( wx.EVT_BUTTON, self.OnPreviewVideo )
@@ -79,9 +87,6 @@ class Frame ( wx.Frame ):
 
 
     # Virtual event handlers, overide them in your derived class
-    def OnClose( self, event ):
-        event.Skip()
-
     def OnFileOpen( self, event ):
         event.Skip()
 

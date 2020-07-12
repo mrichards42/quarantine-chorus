@@ -16,8 +16,8 @@ from .Layout import LayoutPanel
 class Frame(base.Frame):
     def __init__(self, parent):
         super().__init__(parent)
-        self.layout = LayoutPanel(self)
-        self.tracklist = TrackListPanel(self)
+        self.layout = LayoutPanel(self.m_panel)
+        self.tracklist = TrackListPanel(self.m_panel)
         self.m_sizer.Insert(0, self.layout, 1, wx.EXPAND | wx.ALL, 5)
         self.m_sizer.Insert(1, self.tracklist, 1, wx.EXPAND | wx.ALL, 5)
 
