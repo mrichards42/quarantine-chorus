@@ -64,9 +64,10 @@ class _TrackList(Observable):
 
     def add(self, *paths):
         for path in paths:
-            self.track_order.append(path)
-            self.tracks[path] = self._new(path)
-            self.probe_track(path)
+            if path not in self.track_order:
+                self.track_order.append(path)
+                self.tracks[path] = self._new(path)
+                self.probe_track(path)
         self.notify()
 
     def remove(self, *paths):
