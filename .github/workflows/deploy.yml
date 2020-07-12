@@ -5,6 +5,10 @@ on:
   push:
     branches:
       - master
+    paths:
+      - functions/**
+      - quarantine_chorus/**
+      - config.toml
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
