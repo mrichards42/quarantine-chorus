@@ -1,4 +1,6 @@
 """Background processing for wxEventHandler-derived classes"""
+import logging
+import time
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 
@@ -19,7 +21,22 @@ class ThreadPool:
         self.pool.shutdown(*args, **kwargs)
 
     def run(self, f, *args, callback=None, **kwargs):
-        future = self.pool.submit(f, *args, **kwargs)
+        def wrapper(*args, **kwargs):
+            try:
+                start = time.time()
+                fn_name = '.'.join(filter(None, (f.__module__, f.__qualname__)))
+                fn_args = ', '.join((*map(repr, args),
+                                     *(f'{k}={v!r}' for k,v in kwargs.items())))
+                logging.info("Background function %s start with args (%s)",
+                             fn_name, fn_args)
+                ret = f(*args, **kwargs)
+                logging.info("Background function %s took %0.3f seconds.",
+                             fn_name, time.time() - start)
+                return ret
+            except Exception:
+                logging.exception("Exception in background thread %s", fn_name)
+                raise
+        future = self.pool.submit(wrapper, *args, **kwargs)
         if callback:
             future.add_done_callback(partial(self.post_future_event, callback))
 
