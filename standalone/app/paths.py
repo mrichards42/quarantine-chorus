@@ -26,9 +26,12 @@ def default_shotcut_dir():
                     return p
 
 
-def find_shotcut_executable(*names, shotcut_dir=None):
+def find_shotcut_executable(name, shotcut_dir=None):
     exe = None
     shotcut_dir = shotcut_dir or default_shotcut_dir()
+    names = [name]
+    if os.name == 'nt':
+        names = [name + '.exe', name]
     if shotcut_dir:
         exe = find_file(shotcut_dir, *names)
     if exe:

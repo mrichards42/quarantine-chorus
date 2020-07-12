@@ -64,7 +64,7 @@ def find_executables():
     shotcut_dir = None
     while True:
         executables = {
-            name: find_shotcut_executable(name, name + '.exe', shotcut_dir=shotcut_dir)
+            name: find_shotcut_executable(name, shotcut_dir=shotcut_dir)
             for name in all_exes
         }
         missing_exes = F.lremove(executables, required_exes)
