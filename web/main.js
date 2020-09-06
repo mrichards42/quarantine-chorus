@@ -466,9 +466,11 @@
 
   function submit(formData, file, tryNumber) {
 
-    Sentry.configureScope(function(scope) {
-      scope.setExtra("form_data", JSON.stringify(formData));
-    });
+    if (window.Sentry) {
+      Sentry.configureScope(function(scope) {
+        scope.setExtra("form_data", JSON.stringify(formData));
+      });
+    }
 
     // setup the ui
     var progressPanel = document.getElementById('uploadProgress');
@@ -509,7 +511,9 @@
         progressTitle.textContent = 'Upload complete!';
         progressSubtitle.textContent = 'Thank you for your submission.';
       }).catch(function (e) {
-        Sentry.captureException(e);
+        if (window.Sentry) {
+          Sentry.captureException(e);
+        }
         progressTitle.textContent = 'Something went wrong!';
         setTitlePrefix('[ERROR] ');
         if (e.message === 'bad response') {
