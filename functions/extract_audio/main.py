@@ -15,7 +15,7 @@ def extract_audio_to_file(in_file, out_file, cfg):
     return (
         ffmpeg.input(in_file)
         .audio
-        .filter('aresample', cfg.get('samplerate', 48000))
+        .filter('aresample', cfg.get('samplerate', 48000), first_pts=0)
         .filter('asetpts', 'PTS-STARTPTS')
         .output(
             out_file,
