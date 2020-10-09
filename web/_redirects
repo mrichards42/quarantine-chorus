@@ -11,13 +11,6 @@
 
 ## In progress songs
 
-# 480
-/providence/480/submit      /submission.html  200
-/providence/480/lead-video  https://www.youtube-nocookie.com/embed/UMwxJ1ZwRxU?modestbranding=1&rel=0
-
-# 340
-/providence/340/submit      /submission.html  200
-/providence/340/lead-video  https://www.youtube-nocookie.com/embed/BcT_gTUlJ1M?modestbranding=1&rel=0
 
 ## Complete songs
 
@@ -44,3 +37,11 @@
 # 70t
 /providence/70t/mix-video  https://www.youtube-nocookie.com/embed/hk1fjriKPsI?modestbranding=1&rel=0
 /providence/70t/*          /mix.html  200
+
+# 340
+/providence/340/mix-video  https://www.youtube-nocookie.com/embed/Q2uCZXlSEf0?modestbranding=1&rel=0
+/providence/340/*          /mix.html  200
+
+# 480
+/providence/480/mix-video  https://www.youtube-nocookie.com/embed/G9fljaIdMi0?modestbranding=1&rel=0
+/providence/480/*          /mix.html  200
