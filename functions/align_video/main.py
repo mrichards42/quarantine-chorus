@@ -44,6 +44,7 @@ def write_aligned_video(in_file, out_file, analysis, cfg):
     if cfg.get('framerate'):
         output_args['r'] = cfg.get('framerate')
     output_args['movflags'] = '+faststart'  # allow re-encoding on the fly
+    output_args['ac'] = 1
     streams = [audio, video] if video else [audio]
     return ffmpeg.output(*streams, out_file, **output_args).run(overwrite_output=True)
 
