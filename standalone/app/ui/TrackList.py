@@ -9,6 +9,7 @@ from app.model.tracklist import TrackList
 
 from . import base
 from . import draglist
+from . import dialogs
 
 
 # == Labels ==
@@ -66,6 +67,11 @@ def loudness_label(track):
         return "...analyzing..."
 
 
+def fade_out_label(track):
+    duration = track['filters'].get('fade_out', {}).get('duration', 0)
+    return f"{duration} seconds"
+
+
 # == Panel ==
 
 class TrackListPanel(base.TrackListPanel):
@@ -102,6 +108,7 @@ class TrackListPanel(base.TrackListPanel):
         self.m_listCtrl.AppendColumn("Orientation")
         self.m_listCtrl.AppendColumn("Alignment shift", wx.LIST_FORMAT_RIGHT)
         self.m_listCtrl.AppendColumn("Normalization")
+        self.m_listCtrl.AppendColumn("Fade out")
         self.m_listCtrl.AppendColumn("Full path")
         self._refreshList()
 
@@ -122,6 +129,7 @@ class TrackListPanel(base.TrackListPanel):
                 orientation(t),
                 alignment_label(t) or '(click align)',
                 loudness_label(t) or '(click normalize)',
+                fade_out_label(t) or '(click fade out)',
                 t['path'],
             ]
             for col, label in enumerate(row):
@@ -139,6 +147,7 @@ class TrackListPanel(base.TrackListPanel):
         tracks_text = f"{count or 'all'} {'track' if count == 1 else 'tracks'}"
         self.m_alignBtn.SetLabel(f"Align {tracks_text}")
         self.m_normalizeBtn.SetLabel(f"Normalize {tracks_text}")
+        self.m_fadeOutBtn.SetLabel(f"Fade out {tracks_text}")
         if count == 0:
             self.m_deleteBtn.Disable()
             self.m_deleteBtn.SetLabel(f"Delete")
@@ -233,3 +242,20 @@ class TrackListPanel(base.TrackListPanel):
             tracks = self.GetSelectedTrackNames() or TrackList.track_names()
             for path in tracks:
                 TrackList.normalize_track(path, target)
+
+    def OnFadeOut(self, evt):
+        seconds = dialogs.GetFloatFromUser(
+            "Enter the fade out duration",
+            self.m_fadeOutBtn.GetLabel(),
+            value=1.5,
+            min=0,
+            max=300,
+            parent=self
+        )
+        if seconds is not None:
+            tracks = self.GetSelectedTrackNames() or TrackList.track_names()
+            for path in tracks:
+                if seconds == 0:
+                    TrackList.remove_filter(path, 'fade_out')
+                else:
+                    TrackList.set_filter(path, 'fade_out', {'duration': seconds})

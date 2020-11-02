@@ -18,11 +18,13 @@ TEMPLATE = compiler.compile(TEMPLATE_STR)
 
 
 def fmt_duration(seconds):
+    sign = '' if abs(seconds) == seconds else '-'
+    seconds = abs(seconds)
     s = int(seconds)
     ms = int((seconds - s) * 1000)
     m, s = divmod(s, 60)
     h, m = divmod(m, 60)
-    return f'{h:02d}:{m:02d}:{s:02d}.{ms:03d}'
+    return f'{sign}{h:02d}:{m:02d}:{s:02d}.{ms:03d}'
 
 
 class ResourcePartials(dict):
@@ -48,5 +50,6 @@ def write_file(tracks, width=None, height=None):
     return TEMPLATE(ctx,
                     helpers={'fmt_duration': lambda _, d: fmt_duration(d or 0),
                              'concat': lambda _, *args: reduce(operator.add, args),
+                             '-': lambda _, *args: reduce(operator.sub, args),
                              'inc': lambda _, x: x + 1},
                     partials=ResourcePartials())
