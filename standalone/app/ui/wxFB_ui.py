@@ -186,12 +186,37 @@ class LayoutPanel ( wx.Panel ):
 
         self.m_sizer = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Layout" ), wx.HORIZONTAL )
 
+        bSizer7 = wx.BoxSizer( wx.VERTICAL )
+
+        self.m_staticText4 = wx.StaticText( self.m_sizer.GetStaticBox(), wx.ID_ANY, u"Video Size (width x height)", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText4.Wrap( -1 )
+
+        bSizer7.Add( self.m_staticText4, 0, wx.ALL, 5 )
+
+        m_videoSizeChoices = [ u"1280x720 (16:9)", u"1920x1080 (16:9)", u"2560x1440 (16:9)" ]
+        self.m_videoSize = wx.ComboBox( self.m_sizer.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, m_videoSizeChoices, 0 )
+        self.m_videoSize.SetSelection( 1 )
+        bSizer7.Add( self.m_videoSize, 0, wx.ALL, 5 )
+
+
+        self.m_sizer.Add( bSizer7, 0, wx.EXPAND, 5 )
+
 
         self.SetSizer( self.m_sizer )
         self.Layout()
 
+        # Connect Events
+        self.m_videoSize.Bind( wx.EVT_COMBOBOX, self.OnVideoSizeUpdated )
+        self.m_videoSize.Bind( wx.EVT_KILL_FOCUS, self.OnVideoSizeUpdated )
+
     def __del__( self ):
         pass
+
+
+    # Virtual event handlers, overide them in your derived class
+    def OnVideoSizeUpdated( self, event ):
+        event.Skip()
+
 
 
 ###########################################################################

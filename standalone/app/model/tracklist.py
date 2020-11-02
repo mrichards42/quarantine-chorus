@@ -48,12 +48,13 @@ class _TrackList(Observable):
     def as_mlt_tracks(self):
         return [dict(**t, filename=t['path']) for t in self.all_tracks()]
 
-    def as_layout(self, video_height=None):
+    def as_layout(self, aspect_ratio=16/9, video_height=None):
         from quarantine_chorus.layout import Layout, LayoutTrack
-        layout = Layout(LayoutTrack(name=t['path'],
-                                    width=t['width'],
-                                    height=t['height'])
-                        for t in self.video_tracks())
+        layout = Layout((LayoutTrack(name=t['path'],
+                                    width=t['original_width'],
+                                    height=t['original_height'])
+                         for t in self.video_tracks()),
+                        aspect_ratio)
         if video_height:
             for v in layout.videos:
                 v.scale(height=video_height)
@@ -104,15 +105,18 @@ class _TrackList(Observable):
         }, **self.tracks[path])
         self.notify()
 
-    def update_from_layout(self, layout):
+    def update_from_layout(self, layout, total_width=None, total_height=None):
+        total_width = total_width or layout.width
+        total_height = total_height or layout.height
+        scale = min(total_width / layout.width, total_height / layout.height)
         for v in layout.videos:
-            self.tracks[v.name]['left'] = v.left
-            self.tracks[v.name]['top'] = v.top
-            self.tracks[v.name]['width'] = v.width
-            self.tracks[v.name]['height'] = v.height
-            self.tracks[v.name]['crop'] = v.crop_amount()
-        self.background['width'] = int(layout.width)
-        self.background['height'] = int(layout.height)
+            self.tracks[v.name]['left'] = int(v.left * scale)
+            self.tracks[v.name]['top'] = int(v.top * scale)
+            self.tracks[v.name]['width'] = int(v.width * scale)
+            self.tracks[v.name]['height'] = int(v.height * scale)
+            self.tracks[v.name]['crop'] = int(v.crop_amount() * scale)
+        self.background['width'] = int(total_width)
+        self.background['height'] = int(total_height)
         self.notify()
 
     def _new(self, path):
