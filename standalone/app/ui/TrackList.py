@@ -71,6 +71,7 @@ def loudness_label(track):
 class TrackListPanel(base.TrackListPanel):
     def __init__(self, parent):
         super().__init__(parent)
+        self.pinned_columns = set()
         self._setupList()
         # List dragging setup
         self.listDragger = draglist.ListDragger(self.m_listCtrl)
@@ -128,7 +129,8 @@ class TrackListPanel(base.TrackListPanel):
                     self.m_listCtrl.SetItem(idx, col, label)
         # Auto-size columns
         for idx in range(self.m_listCtrl.GetColumnCount()):
-            self.m_listCtrl.SetColumnWidth(idx, wx.LIST_AUTOSIZE_USEHEADER)
+            if idx not in self.pinned_columns:
+                self.m_listCtrl.SetColumnWidth(idx, wx.LIST_AUTOSIZE_USEHEADER)
         self.m_listCtrl.Refresh()
         self._refreshListButtons()
 
@@ -147,6 +149,10 @@ class TrackListPanel(base.TrackListPanel):
 
     def OnListSelectionChanged(self, evt):
         self._refreshListButtons()
+
+    def OnListHeaderResized(self, evt):
+        self.pinned_columns.add(evt.GetColumn())
+        evt.Skip()
 
     # -- List dragging --
 

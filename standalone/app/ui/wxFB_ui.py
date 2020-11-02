@@ -141,6 +141,7 @@ class TrackListPanel ( wx.Panel ):
         self.m_deleteBtn.Bind( wx.EVT_BUTTON, self.OnDeleteTracks )
         self.m_alignBtn.Bind( wx.EVT_BUTTON, self.OnAlign )
         self.m_normalizeBtn.Bind( wx.EVT_BUTTON, self.OnNormalize )
+        self.m_listCtrl.Bind( wx.EVT_LIST_COL_END_DRAG, self.OnListHeaderResized )
         self.m_listCtrl.Bind( wx.EVT_LIST_ITEM_DESELECTED, self.OnListSelectionChanged )
         self.m_listCtrl.Bind( wx.EVT_LIST_ITEM_SELECTED, self.OnListSelectionChanged )
         self.m_listCtrl.Bind( wx.EVT_RIGHT_DOWN, self.OnListRightDown )
@@ -158,6 +159,9 @@ class TrackListPanel ( wx.Panel ):
         event.Skip()
 
     def OnNormalize( self, event ):
+        event.Skip()
+
+    def OnListHeaderResized( self, event ):
         event.Skip()
 
     def OnListSelectionChanged( self, event ):

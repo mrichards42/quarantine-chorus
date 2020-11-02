@@ -827,6 +827,7 @@
                         <property name="window_extra_style"></property>
                         <property name="window_name"></property>
                         <property name="window_style"></property>
+                        <event name="OnListColEndDrag">OnListHeaderResized</event>
                         <event name="OnListItemDeselected">OnListSelectionChanged</event>
                         <event name="OnListItemSelected">OnListSelectionChanged</event>
                         <event name="OnRightDown">OnListRightDown</event>
