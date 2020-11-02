@@ -19,10 +19,10 @@ def ffmpeg_mix(tracks, width=None, height=None, audio_only=False, scale=1):
             if t.get('alignment_analysis'):
                 audio = audio.align_audio(t['alignment_analysis'])
             # Volume adjust
-            in_loudness = t.get('loudness_analysis', {}).get('L')
+            in_loudness = t['filters'].get('loudness', {}).get('L')
             if in_loudness:
                 # From https://github.com/mltframework/mlt/blob/7da01504d6844412b6e26c03b7c98214a1730343/src/modules/plus/filter_loudness.c#L160-L169
-                target_db = t['loudness_analysis']['program']
+                target_db = t['filters']['loudness']['program']
                 delta_db = target_db - in_loudness
                 audio = audio.volume(dB=delta_db)
             audio_streams.append(audio)

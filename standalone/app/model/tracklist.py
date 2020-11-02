@@ -87,6 +87,18 @@ class _TrackList(Observable):
         self.tracks[path].update(kwargs)
         self.notify()
 
+    def set_filter(self, path, name, args):
+        self.tracks[path]['filters'][name] = args
+        self.notify()
+
+    def remove_filter(self, path, name):
+        del self.tracks[path]['filters'][name]
+        self.notify()
+
+    def set_status(self, path, name, status):
+        self.tracks[path]['status'][name] = status
+        self.notify()
+
     def update_from_probe(self, probe):
         path = probe.filename
         self.tracks[path] = dict(**{
@@ -123,8 +135,9 @@ class _TrackList(Observable):
         return {
             'path': path,
             'name': Path(path).name,
+            'status': {},
             'alignment_analysis': {},
-            'loudness_analysis': {},
+            'filters': {},
         }
 
     # Background events
@@ -133,18 +146,28 @@ class _TrackList(Observable):
         wx.GetApp().RunInBackground(ffmpeg.probe, path, callback=self.update_from_probe)
 
     def align_track(self, reference, subject):
-        self.merge(subject, alignment_analysis={'running': True})
+        self.set_status(subject, 'alignment', 'running')
+
+        def on_complete(analysis):
+            self.set_status(subject, 'alignment', 'complete')
+            self.merge(subject, alignment_analysis=analysis)
+
         wx.GetApp().RunInBackground(
             lambda: align.cross_correlate(reference, subject,
                                           samplerate=22400,
                                           preprocess='loudness_25')[0],
-            callback=lambda analysis: self.merge(subject, alignment_analysis=analysis))
+            callback=on_complete)
 
     def normalize_track(self, path, target):
-        self.merge(path, loudness_analysis={'running': True})
+        self.set_status(path, 'loudness', 'running')
+
+        def on_complete(result):
+            self.set_status(path, 'loudness', 'complete')
+            self.set_filter(path, 'loudness', result)
+
         wx.GetApp().RunInBackground(
             mlt.melt.loudness_analysis, path, target,
-            callback=lambda result: self.merge(path, loudness_analysis=result))
+            callback=on_complete)
 
 
 TrackList = _TrackList()

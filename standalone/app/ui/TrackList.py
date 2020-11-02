@@ -54,15 +54,15 @@ def alignment_label(track):
     shift = track['alignment_analysis'].get('correlation_shift_seconds')
     if shift is not None:
         return f"{shift:+0.3f} s"
-    elif track['alignment_analysis'].get('running'):
+    elif track['status'].get('alignment') == 'running':
         return "...analyzing..."
 
 
 def loudness_label(track):
-    target = track['loudness_analysis'].get('program')
+    target = track['filters'].get('loudness', {}).get('program')
     if target is not None:
         return f"complete ({target} dB)"
-    elif track['loudness_analysis'].get('running'):
+    elif track['status'].get('loudness') == 'running':
         return "...analyzing..."
 
 

@@ -67,25 +67,10 @@
             <property name="transition.threads">0</property>
           </filter>
         {{/if}}
-        {{!-- loudness normalization filter --}}
-        {{#if loudness_analysis}}
-          <filter>
-            <property name="program">{{loudness_analysis.program}}</property>
-            <property name="mlt_service">loudness</property>
-            <property name="results">{{loudness_analysis.results}}</property>
-            <property name="disable">0</property>
-            <property name="reload">1</property>
-          </filter>
-        {{/if}}
-        {{!-- maybe a volume filter? --}}
-        {{#if volume}}
-          <filter>
-            <property name="window">75</property>
-            <property name="max_gain">20dB</property>
-            <property name="level">{{volume}}</property>
-            <property name="mlt_service">volume</property>
-          </filter>
-        {{/if}}
+        {{!-- filters --}}
+        {{#each filters}}
+          {{> (concat 'filter_' @key) filter=this track=../this}}
+        {{/each}}
       </producer>
 
       <playlist id="playlist{{@index}}">
