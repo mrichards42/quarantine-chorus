@@ -69,12 +69,14 @@ def loudness_label(track):
 
 def fade_in_label(track):
     duration = track['filters'].get('fade_in', {}).get('duration', 0)
-    return f"{duration} seconds"
+    if duration > 0:
+        return f"{duration} seconds"
 
 
 def fade_out_label(track):
     duration = track['filters'].get('fade_out', {}).get('duration', 0)
-    return f"{duration} seconds"
+    if duration > 0:
+        return f"{duration} seconds"
 
 
 # == Panel ==
