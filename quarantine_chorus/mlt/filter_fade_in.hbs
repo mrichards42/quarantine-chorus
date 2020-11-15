@@ -1,0 +1,20 @@
+{{#if track.has_video}}
+  <filter>
+    <property name="start">1</property>
+    <property name="level">1</property>
+    <property name="mlt_service">brightness</property>
+    <property name="shotcut:filter">fadeInBrightness</property>
+    <property name="alpha">{{fmt_duration 0}}=0;{{fmt_duration filter.duration}}=1</property>
+    <property name="shotcut:animIn">{{fmt_duration filter.duration}}</property>
+  </filter>
+{{/if}}
+{{#if track.has_audio}}
+  <filter>
+    <property name="window">75</property>
+    <property name="max_gain">20dB</property>
+    <property name="level">{{fmt_duration 0}}=-60;{{fmt_duration filter.duration}}=0</property>
+    <property name="mlt_service">volume</property>
+    <property name="shotcut:filter">fadeInVolume</property>
+    <property name="shotcut:animIn">{{fmt_duration filter.duration}}</property>
+  </filter>
+{{/if}}

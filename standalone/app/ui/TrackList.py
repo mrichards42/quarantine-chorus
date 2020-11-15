@@ -67,6 +67,11 @@ def loudness_label(track):
         return "...analyzing..."
 
 
+def fade_in_label(track):
+    duration = track['filters'].get('fade_in', {}).get('duration', 0)
+    return f"{duration} seconds"
+
+
 def fade_out_label(track):
     duration = track['filters'].get('fade_out', {}).get('duration', 0)
     return f"{duration} seconds"
@@ -108,6 +113,7 @@ class TrackListPanel(base.TrackListPanel):
         self.m_listCtrl.AppendColumn("Orientation")
         self.m_listCtrl.AppendColumn("Alignment shift", wx.LIST_FORMAT_RIGHT)
         self.m_listCtrl.AppendColumn("Normalization")
+        self.m_listCtrl.AppendColumn("Fade in")
         self.m_listCtrl.AppendColumn("Fade out")
         self.m_listCtrl.AppendColumn("Full path")
         self._refreshList()
@@ -129,6 +135,7 @@ class TrackListPanel(base.TrackListPanel):
                 orientation(t),
                 alignment_label(t) or '(click align)',
                 loudness_label(t) or '(click normalize)',
+                fade_in_label(t) or '(click fade in)',
                 fade_out_label(t) or '(click fade out)',
                 t['path'],
             ]
@@ -147,6 +154,7 @@ class TrackListPanel(base.TrackListPanel):
         tracks_text = f"{count or 'all'} {'track' if count == 1 else 'tracks'}"
         self.m_alignBtn.SetLabel(f"Align {tracks_text}")
         self.m_normalizeBtn.SetLabel(f"Normalize {tracks_text}")
+        self.m_fadeInBtn.SetLabel(f"Fade in {tracks_text}")
         self.m_fadeOutBtn.SetLabel(f"Fade out {tracks_text}")
         if count == 0:
             self.m_deleteBtn.Disable()
@@ -243,9 +251,26 @@ class TrackListPanel(base.TrackListPanel):
             for path in tracks:
                 TrackList.normalize_track(path, target)
 
+    def OnFadeIn(self, evt):
+        seconds = dialogs.GetFloatFromUser(
+            "Enter the fade in duration in seconds",
+            self.m_fadeInBtn.GetLabel(),
+            value=1.5,
+            min=0,
+            max=300,
+            parent=self
+        )
+        if seconds is not None:
+            tracks = self.GetSelectedTrackNames() or TrackList.track_names()
+            for path in tracks:
+                if seconds == 0:
+                    TrackList.remove_filter(path, 'fade_in')
+                else:
+                    TrackList.set_filter(path, 'fade_in', {'duration': seconds})
+
     def OnFadeOut(self, evt):
         seconds = dialogs.GetFloatFromUser(
-            "Enter the fade out duration",
+            "Enter the fade out duration in seconds",
             self.m_fadeOutBtn.GetLabel(),
             value=1.5,
             min=0,

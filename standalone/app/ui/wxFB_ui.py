@@ -127,6 +127,9 @@ class TrackListPanel ( wx.Panel ):
         self.m_normalizeBtn = wx.Button( sbSizer1.GetStaticBox(), wx.ID_ANY, u"Normalize", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_listButtonSizer.Add( self.m_normalizeBtn, 0, wx.ALL, 5 )
 
+        self.m_fadeInBtn = wx.Button( sbSizer1.GetStaticBox(), wx.ID_ANY, u"Fade in", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_listButtonSizer.Add( self.m_fadeInBtn, 0, wx.ALL, 5 )
+
         self.m_fadeOutBtn = wx.Button( sbSizer1.GetStaticBox(), wx.ID_ANY, u"Fade out", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_listButtonSizer.Add( self.m_fadeOutBtn, 0, wx.ALL, 5 )
 
@@ -144,6 +147,7 @@ class TrackListPanel ( wx.Panel ):
         self.m_deleteBtn.Bind( wx.EVT_BUTTON, self.OnDeleteTracks )
         self.m_alignBtn.Bind( wx.EVT_BUTTON, self.OnAlign )
         self.m_normalizeBtn.Bind( wx.EVT_BUTTON, self.OnNormalize )
+        self.m_fadeInBtn.Bind( wx.EVT_BUTTON, self.OnFadeIn )
         self.m_fadeOutBtn.Bind( wx.EVT_BUTTON, self.OnFadeOut )
         self.m_listCtrl.Bind( wx.EVT_LIST_COL_END_DRAG, self.OnListHeaderResized )
         self.m_listCtrl.Bind( wx.EVT_LIST_ITEM_DESELECTED, self.OnListSelectionChanged )
@@ -163,6 +167,9 @@ class TrackListPanel ( wx.Panel ):
         event.Skip()
 
     def OnNormalize( self, event ):
+        event.Skip()
+
+    def OnFadeIn( self, event ):
         event.Skip()
 
     def OnFadeOut( self, event ):
