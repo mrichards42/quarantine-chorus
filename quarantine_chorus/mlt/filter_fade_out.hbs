@@ -1,10 +1,10 @@
 {{#if track.has_video}}
   <filter>
     <property name="start">1</property>
-    <property name="level">{{fmt_duration (- track.duration filter.duration)}}=1;{{fmt_duration track.duration}}=0</property>
+    <property name="level">1</property>
     <property name="mlt_service">brightness</property>
     <property name="shotcut:filter">fadeOutBrightness</property>
-    <property name="alpha">1</property>
+    <property name="alpha">{{fmt_duration (- track.duration filter.duration)}}=1;{{fmt_duration track.duration}}=0</property>
     <property name="shotcut:animOut">{{fmt_duration filter.duration}}</property>
   </filter>
 {{/if}}
