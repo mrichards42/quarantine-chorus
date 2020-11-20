@@ -104,10 +104,13 @@ class LayoutTrack:
         unscaled_width = self.width / self.scale_factor
         unscaled_height = self.height / self.scale_factor
         # Compute the new scaling factor
-        self.scale_factor = min(
-            width / self.original_width if width else 1.0,
-            height / self.original_height if height else 1.0
-        )
+        if width or height:
+            self.scale_factor = min(
+                width / self.original_width if width else float('inf'),
+                height / self.original_height if height else float('inf'),
+            )
+        else:
+            self.scale_factor = 1.0
         # Rescale
         self.width = int(unscaled_width * self.scale_factor)
         self.height = int(unscaled_height * self.scale_factor)
